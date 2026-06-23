@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>REDCELL — AI Rapor Motoru</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --red:#c0392b;--red-d:#a93226;
+  --bg:#0a0a0a;--bg2:#0f0f0f;--bg3:#141414;
+  --line:#1a1a1a;--line2:#2a2a2a;
+  --text:#e8e8e0;--muted:#888;--faint:#555;
+  --green:#27ae60;--amber:#e67e22;--blue:#2980b9;
+  --purple:#8e44ad;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+nav{display:flex;justify-content:space-between;align-items:center;padding:16px 32px;border-bottom:0.5px solid var(--line2);background:rgba(10,10,10,0.97);position:sticky;top:0;z-index:100;backdrop-filter:blur(10px)}
+.logo{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;letter-spacing:0.15em;color:var(--text);text-decoration:none}
+.logo span{color:var(--red)}
+.nav-r{display:flex;gap:12px;align-items:center}
+.nbtn{font-family:'Space Mono',monospace;font-size:10px;padding:7px 16px;border:0.5px solid var(--line2);color:var(--muted);background:none;cursor:pointer;letter-spacing:0.08em;text-transform:uppercase;transition:all 0.2s;text-decoration:none}
+.nbtn:hover{border-color:var(--muted);color:var(--text)}
+.nbtn.red{border-color:var(--red);color:var(--red)}
+.nbtn.red:hover{background:var(--red);color:#fff}
+
+.layout{display:grid;grid-template-columns:420px 1fr;min-height:calc(100vh - 53px)}
+
+/* SOL PANEL — GİRİŞ */
+.sol{border-right:0.5px solid var(--line);padding:28px;overflow-y:auto;max-height:calc(100vh - 53px);position:sticky;top:53px}
+.panel-label{font-family:'Space Mono',monospace;font-size:10px;color:var(--red);letter-spacing:0.2em;text-transform:uppercase;margin-bottom:20px;display:flex;align-items:center;gap:10px}
+.panel-label::after{content:'';flex:1;height:0.5px;background:var(--line2)}
+
+.field{display:flex;flex-direction:column;gap:7px;margin-bottom:16px}
+.field label{font-family:'Space Mono',monospace;font-size:10px;color:var(--faint);letter-spacing:0.1em;text-transform:uppercase}
+.field input,.field select,.field textarea{background:var(--bg2);border:0.5px solid var(--line2);color:var(--text);padding:10px 12px;font-family:'Space Grotesk',sans-serif;font-size:13px;outline:none;transition:border-color 0.2s;width:100%}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--red)}
+.field textarea{resize:vertical;min-height:90px;font-family:'Space Mono',monospace;font-size:12px}
+.field select option{background:#1a1a1a}
+
+/* ARAÇ SEKMELERİ */
+.tool-tabs{display:flex;gap:1px;background:var(--line);margin-bottom:16px}
+.ttab{flex:1;font-family:'Space Mono',monospace;font-size:10px;padding:9px 4px;text-align:center;color:var(--faint);cursor:pointer;border:none;background:var(--bg2);transition:all 0.2s;letter-spacing:0.06em;text-transform:uppercase}
+.ttab.active{background:var(--bg3);color:var(--text);border-bottom:1px solid var(--red)}
+.ttab:hover:not(.active){color:var(--muted)}
+.tool-panel{display:none}
+.tool-panel.active{display:block}
+
+.zafiyet-list{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.zafiyet-item{background:var(--bg2);border:0.5px solid var(--line2);padding:12px}
+.zafiyet-row{display:flex;gap:8px;align-items:flex-start}
+.zafiyet-row input,.zafiyet-row select{flex:1;background:var(--bg3);border:0.5px solid var(--line2);color:var(--text);padding:7px 8px;font-size:12px;outline:none}
+.zafiyet-row select{flex:0 0 100px}
+.del-btn{background:none;border:0.5px solid var(--line2);color:var(--faint);padding:7px 10px;cursor:pointer;font-size:14px;transition:all 0.2s}
+.del-btn:hover{border-color:var(--red);color:var(--red)}
+.add-btn{width:100%;padding:9px;background:none;border:0.5px dashed var(--line2);color:var(--faint);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:all 0.2s}
+.add-btn:hover{border-color:var(--green);color:var(--green)}
+
+.uret-btn{width:100%;padding:15px;background:var(--red);color:#fff;border:none;font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:background 0.2s;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:10px}
+.uret-btn:hover{background:var(--red-d)}
+.uret-btn:disabled{background:var(--faint);cursor:not-allowed}
+
+/* SAĞ PANEL — RAPOR */
+.sag{padding:28px;overflow-y:auto;max-height:calc(100vh - 53px)}
+
+/* DURUM AŞAMALARI */
+.asamalar{display:flex;gap:0;margin-bottom:28px;border:0.5px solid var(--line2)}
+.asama{flex:1;padding:12px 10px;text-align:center;border-right:0.5px solid var(--line2);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--faint);transition:all 0.3s;position:relative}
+.asama:last-child{border-right:none}
+.asama.active{color:var(--amber);background:rgba(230,126,34,0.05)}
+.asama.done{color:var(--green);background:rgba(39,174,96,0.05)}
+.asama .a-icon{font-size:16px;display:block;margin-bottom:4px}
+
+/* RİSK MATRİSİ */
+.risk-matrix{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);margin-bottom:24px}
+.risk-cell{padding:16px 12px;text-align:center;background:var(--bg)}
+.risk-cell .r-num{font-family:'Space Mono',monospace;font-size:24px;font-weight:700;line-height:1}
+.risk-cell .r-label{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;margin-top:4px;font-family:'Space Mono',monospace}
+.risk-kritik{border-top:2px solid var(--red)}
+.risk-kritik .r-num{color:var(--red)}
+.risk-kritik .r-label{color:var(--red)}
+.risk-yuksek{border-top:2px solid var(--amber)}
+.risk-yuksek .r-num{color:var(--amber)}
+.risk-yuksek .r-label{color:var(--amber)}
+.risk-orta{border-top:2px solid var(--blue)}
+.risk-orta .r-num{color:var(--blue)}
+.risk-orta .r-label{color:var(--blue)}
+.risk-dusuk{border-top:2px solid var(--green)}
+.risk-dusuk .r-num{color:var(--green)}
+.risk-dusuk .r-label{color:var(--green)}
+
+/* RAPOR BLOKLAR */
+.rapor-blok{margin-bottom:20px;border:0.5px solid var(--line2)}
+.rapor-blok-head{padding:12px 16px;background:var(--bg2);border-bottom:0.5px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+.rapor-blok-head h3{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)}
+.rapor-blok-icerik{padding:16px;font-size:13px;color:var(--muted);line-height:1.8;white-space:pre-wrap}
+
+/* ZAFİYET KARTI */
+.zaf-kart{border:0.5px solid var(--line2);margin-bottom:10px}
+.zaf-head{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:0.5px solid var(--line);cursor:pointer;transition:background 0.15s}
+.zaf-head:hover{background:var(--bg2)}
+.sev-badge{font-family:'Space Mono',monospace;font-size:10px;padding:3px 10px;letter-spacing:0.08em;flex-shrink:0}
+.sev-kritik{background:rgba(192,57,43,0.12);color:var(--red);border:0.5px solid rgba(192,57,43,0.4)}
+.sev-yuksek{background:rgba(230,126,34,0.12);color:var(--amber);border:0.5px solid rgba(230,126,34,0.4)}
+.sev-orta{background:rgba(41,128,185,0.12);color:var(--blue);border:0.5px solid rgba(41,128,185,0.4)}
+.sev-dusuk{background:rgba(39,174,96,0.12);color:var(--green);border:0.5px solid rgba(39,174,96,0.4)}
+.zaf-baslik{font-size:13px;font-weight:500;color:var(--text);flex:1}
+.cvss-chip{font-family:'Space Mono',monospace;font-size:11px;color:var(--faint)}
+.zaf-detay{padding:16px;font-size:12px;color:var(--muted);line-height:1.75;display:none;background:var(--bg2)}
+.zaf-detay.open{display:block}
+.zaf-detay-row{display:grid;grid-template-columns:120px 1fr;gap:8px;margin-bottom:8px}
+.zaf-detay-row strong{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--faint)}
+
+/* LOADING */
+.loading-box{padding:40px 20px;text-align:center}
+.loading-steps{display:flex;flex-direction:column;gap:10px;max-width:340px;margin:24px auto 0}
+.loading-step{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--faint);font-family:'Space Mono',monospace;text-align:left}
+.loading-step .ls-icon{font-size:16px;width:20px;flex-shrink:0}
+.loading-step.done-s{color:var(--green)}
+.loading-step.active-s{color:var(--amber)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{width:32px;height:32px;border:2px solid var(--line2);border-top-color:var(--red);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto}
+
+/* PDF ÇIKTISI */
+.pdf-actions{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.pdf-btn{font-family:'Space Mono',monospace;font-size:11px;padding:10px 20px;border:0.5px solid;cursor:pointer;letter-spacing:0.08em;text-transform:uppercase;transition:all 0.2s;background:none}
+.pdf-btn.primary{border-color:var(--red);color:var(--red)}
+.pdf-btn.primary:hover{background:var(--red);color:#fff}
+.pdf-btn.secondary{border-color:var(--line2);color:var(--muted)}
+.pdf-btn.secondary:hover{border-color:var(--muted);color:var(--text)}
+
+.bos-ekran{text-align:center;padding:80px 20px;color:var(--faint)}
+.bos-ekran i{font-size:48px;display:block;margin-bottom:16px;color:var(--line2)}
+.bos-ekran p{font-size:13px;line-height:1.7;max-width:300px;margin:0 auto}
+
+/* AI DOT ANIMATION */
+@keyframes ai-pulse{0%,100%{opacity:0.3}50%{opacity:1}}
+.ai-dot{width:8px;height:8px;background:var(--red);border-radius:50%;animation:ai-pulse 1s infinite;display:inline-block;margin:0 2px}
+.ai-dot:nth-child(2){animation-delay:0.2s}
+.ai-dot:nth-child(3){animation-delay:0.4s}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="admin.html">RED<span>CELL</span> AR-GE</a>
+  <div class="nav-r">
+    <a class="nbtn" href="admin.html">← Admin Panel</a>
+    <button class="nbtn red" onclick="pdfIndir()" id="pdf-btn" style="display:none"><i class="ti ti-download"></i> PDF İndir</button>
+  </div>
+</nav>
+
+<div class="layout">
+
+  <!-- SOL: GİRİŞ FORMU -->
+  <div class="sol">
+    <div class="panel-label">Rapor Bilgileri</div>
+
+    <div class="field">
+      <label>Müşteri / Firma Adı *</label>
+      <input type="text" id="f-musteri" placeholder="Teknoloji A.Ş."/>
+    </div>
+    <div class="field">
+      <label>Hizmet Türü *</label>
+      <select id="f-hizmet">
+        <option>Web Uygulama Güvenliği</option>
+        <option>Ağ Sızma Testi</option>
+        <option>Mobil Uygulama Analizi</option>
+        <option>Red Team Operasyonu</option>
+        <option>IoT / Donanım Güvenliği</option>
+        <option>Sosyal Mühendislik</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Test Kapsamı / Hedef Sistem</label>
+      <input type="text" id="f-hedef" placeholder="https://app.sirket.com · 10.0.0.0/24"/>
+    </div>
+    <div class="field">
+      <label>Test Tarihi</label>
+      <input type="date" id="f-tarih"/>
+    </div>
+
+    <div class="panel-label" style="margin-top:20px">Araç Çıktısı & Bulgular</div>
+
+    <div class="tool-tabs">
+      <button class="ttab active" onclick="switchTool('manuel',this)">Manuel</button>
+      <button class="ttab" onclick="switchTool('nmap',this)">Nmap</button>
+      <button class="ttab" onclick="switchTool('burp',this)">Burp Suite</button>
+      <button class="ttab" onclick="switchTool('nikto',this)">Nikto</button>
+    </div>
+
+    <!-- MANUEL ZAFİYET GİRİŞİ -->
+    <div class="tool-panel active" id="tool-manuel">
+      <div class="zafiyet-list" id="zafiyet-listesi"></div>
+      <button class="add-btn" onclick="zafiyet ekle()"><i class="ti ti-plus"></i> Zafiyet Ekle</button>
+    </div>
+
+    <!-- NMAP ÇIKTISI -->
+    <div class="tool-panel" id="tool-nmap">
+      <div class="field">
+        <label>Nmap Çıktısını Yapıştır</label>
+        <textarea id="nmap-output" rows="10" placeholder="nmap -sV -sC -O 192.168.1.1 çıktısını buraya yapıştırın...&#10;&#10;Örnek:&#10;PORT   STATE SERVICE VERSION&#10;22/tcp open  ssh     OpenSSH 7.4&#10;80/tcp open  http    Apache 2.4.6&#10;443/tcp open  ssl/https"></textarea>
+      </div>
+    </div>
+
+    <!-- BURP SUITE -->
+    <div class="tool-panel" id="tool-burp">
+      <div class="field">
+        <label>Burp Suite / OWASP ZAP Çıktısı</label>
+        <textarea id="burp-output" rows="10" placeholder="Burp Suite tarama sonuçlarını yapıştırın...&#10;&#10;Örnek:&#10;[HIGH] SQL Injection - /login?user=&#10;[MEDIUM] XSS Reflected - /search?q=&#10;[LOW] Missing X-Frame-Options header&#10;[INFO] Server version disclosure"></textarea>
+      </div>
+    </div>
+
+    <!-- NİKTO -->
+    <div class="tool-panel" id="tool-nikto">
+      <div class="field">
+        <label>Nikto Çıktısı</label>
+        <textarea id="nikto-output" rows="10" placeholder="nikto -h hedef.com çıktısını yapıştırın...&#10;&#10;Örnek:&#10;+ /admin/: Admin login page/section found.&#10;+ Server: Apache/2.4.6 - This might be interesting&#10;+ /phpinfo.php: PHP info file found."></textarea>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:12px">
+      <label>Ek Notlar / Gözlemler</label>
+      <textarea id="f-notlar" rows="3" placeholder="Manuel gözlemler, müşterinin özel istekleri..."></textarea>
+    </div>
+
+    <button class="uret-btn" id="uret-btn" onclick="raporUret()">
+      <i class="ti ti-sparkles"></i> AI Rapor Üret
+    </button>
+  </div>
+
+  <!-- SAĞ: RAPOR ÇIKTISI -->
+  <div class="sag" id="sag-panel">
+    <div class="bos-ekran" id="bos-ekran">
+      <i class="ti ti-file-analytics"></i>
+      <p>Sol taraftan müşteri bilgilerini ve bulgularını girin, ardından <strong>AI Rapor Üret</strong> butonuna basın.</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// Araç tab geçişi
+function switchTool(name, btn){
+  document.querySelectorAll('.tool-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ttab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tool-'+name).classList.add('active');
+  btn.classList.add('active');
+}
+
+// Tarih varsayılanı bugün
+document.getElementById('f-tarih').value = new Date().toISOString().slice(0,10);
+
+// Manuel zafiyet ekleme
+var zafiyetler = [];
+var zafId = 0;
+
+function zafiyetEkle(baslik, seviye, cvss, aciklama, etki, oneri){
+  zafId++;
+  var id = 'z'+zafId;
+  zafiyetler.push({id, baslik: baslik||'', seviye: seviye||'orta', cvss: cvss||'5.0', aciklama: aciklama||'', etki: etki||'', oneri: oneri||''});
+  renderZafiyetler();
+}
+// typo fix - bind to button
+window['zafiyet ekle'] = function(){ zafiyetEkle(); };
+
+function zafiyetSil(id){
+  zafiyetler = zafiyetler.filter(z=>z.id!==id);
+  renderZafiyetler();
+}
+
+function renderZafiyetler(){
+  var el = document.getElementById('zafiyet-listesi');
+  el.innerHTML = zafiyetler.map(z=>`
+    <div class="zafiyet-item" id="zi-${z.id}">
+      <div class="zafiyet-row">
+        <input type="text" placeholder="Zafiyet adı (örn: SQL Injection)" value="${z.baslik}"
+          oninput="updateZaf('${z.id}','baslik',this.value)"/>
+        <select oninput="updateZaf('${z.id}','seviye',this.value)">
+          <option value="kritik" ${z.seviye==='kritik'?'selected':''}>Kritik</option>
+          <option value="yuksek" ${z.seviye==='yuksek'?'selected':''}>Yüksek</option>
+          <option value="orta" ${z.seviye==='orta'?'selected':''}>Orta</option>
+          <option value="dusuk" ${z.seviye==='dusuk'?'selected':''}>Düşük</option>
+        </select>
+        <input type="text" placeholder="CVSS" value="${z.cvss}" style="flex:0 0 60px"
+          oninput="updateZaf('${z.id}','cvss',this.value)"/>
+        <button class="del-btn" onclick="zafiyetSil('${z.id}')"><i class="ti ti-trash"></i></button>
+      </div>
+      <input type="text" placeholder="Açıklama / kanıt" value="${z.aciklama}" style="width:100%;background:var(--bg3);border:0.5px solid var(--line2);border-top:none;color:var(--text);padding:7px 8px;font-size:12px;outline:none;margin-top:1px"
+        oninput="updateZaf('${z.id}','aciklama',this.value)"/>
+    </div>`).join('');
+
+  // Başlangıç zafiyeti yoksa ipucu
+  if(!zafiyetler.length){
+    el.innerHTML='<div style="padding:16px;text-align:center;color:var(--faint);font-size:12px;border:0.5px dashed var(--line2)">Henüz zafiyet eklenmedi. Aşağıdan ekleyin.</div>';
+  }
+}
+renderZafiyetler();
+
+function updateZaf(id, alan, val){
+  var z = zafiyetler.find(x=>x.id===id);
+  if(z) z[alan]=val;
+}
+
+// ── AI RAPOR ÜRET ──
+async function raporUret(){
+  var musteri = document.getElementById('f-musteri').value.trim();
+  var hizmet  = document.getElementById('f-hizmet').value;
+  if(!musteri){ alert('Müşteri adı zorunludur.'); return; }
+
+  // Aktif araç çıktısını topla
+  var aktifArac = document.querySelector('.ttab.active').textContent.trim();
+  var aracCiktisi = '';
+  if(aktifArac==='Manuel'){
+    aracCiktisi = zafiyetler.length
+      ? zafiyetler.map(z=>`- [${z.seviye.toUpperCase()}] CVSS:${z.cvss} ${z.baslik}: ${z.aciklama}`).join('\n')
+      : 'Manuel zafiyet girilmedi';
+  } else if(aktifArac==='Nmap'){
+    aracCiktisi = 'NMAP ÇIKTISI:\n' + document.getElementById('nmap-output').value;
+  } else if(aktifArac==='Burp Suite'){
+    aracCiktisi = 'BURP SUITE / OWASP ZAP ÇIKTISI:\n' + document.getElementById('burp-output').value;
+  } else {
+    aracCiktisi = 'NİKTO ÇIKTISI:\n' + document.getElementById('nikto-output').value;
+  }
+
+  var notlar = document.getElementById('f-notlar').value;
+  var hedef  = document.getElementById('f-hedef').value;
+  var tarih  = document.getElementById('f-tarih').value;
+
+  // UI'yi hazırla
+  var btn = document.getElementById('uret-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="ai-dot"></span><span class="ai-dot"></span><span class="ai-dot"></span> Analiz ediliyor...';
+  document.getElementById('pdf-btn').style.display='none';
+
+  var sag = document.getElementById('sag-panel');
+  sag.innerHTML = `
+    <div class="asamalar">
+      <div class="asama active" id="a1"><span class="a-icon"><i class="ti ti-cpu"></i></span>Analiz</div>
+      <div class="asama" id="a2"><span class="a-icon"><i class="ti ti-shield-search"></i></span>Risk Hesapla</div>
+      <div class="asama" id="a3"><span class="a-icon"><i class="ti ti-file-text"></i></span>Rapor Yaz</div>
+      <div class="asama" id="a4"><span class="a-icon"><i class="ti ti-check"></i></span>Tamamlandı</div>
+    </div>
+    <div class="loading-box" id="loading-box">
+      <div class="spinner"></div>
+      <div class="loading-steps" id="loading-steps">
+        <div class="loading-step active-s" id="ls1"><span class="ls-icon"><i class="ti ti-loader"></i></span>Bulgular analiz ediliyor...</div>
+        <div class="loading-step" id="ls2"><span class="ls-icon"><i class="ti ti-circle"></i></span>Zafiyetler sınıflandırılıyor...</div>
+        <div class="loading-step" id="ls3"><span class="ls-icon"><i class="ti ti-circle"></i></span>CVSS skorları hesaplanıyor...</div>
+        <div class="loading-step" id="ls4"><span class="ls-icon"><i class="ti ti-circle"></i></span>Rapor yazılıyor...</div>
+      </div>
+    </div>
+    <div id="rapor-alani" style="display:none"></div>`;
+
+  // Aşama animasyonu
+  var adimlar = ['ls1','ls2','ls3','ls4'];
+  var asamaMap = {ls1:'a1',ls2:'a2',ls3:'a2',ls4:'a3'};
+  var adimIdx = 0;
+  var adimTimer = setInterval(function(){
+    if(adimIdx>0){
+      var prev = document.getElementById(adimlar[adimIdx-1]);
+      if(prev){ prev.className='loading-step done-s'; prev.querySelector('.ls-icon').innerHTML='<i class="ti ti-check"></i>'; }
+    }
+    if(adimIdx < adimlar.length){
+      var cur = document.getElementById(adimlar[adimIdx]);
+      if(cur) cur.className='loading-step active-s';
+      // Aşama güncelle
+      document.querySelectorAll('.asama').forEach(a=>a.classList.remove('active'));
+      var curAsama = document.getElementById(asamaMap[adimlar[adimIdx]]);
+      if(curAsama) curAsama.classList.add('active');
+      adimIdx++;
+    } else {
+      clearInterval(adimTimer);
+    }
+  }, 1200);
+
+  // AI'ya gönder
+  var prompt = `Sen kıdemli bir siber güvenlik uzmanı ve penetrasyon testi raporlama uzmanısın.
+Aşağıdaki test sonuçlarına dayanarak kapsamlı, profesyonel bir güvenlik raporu üret.
+Raporu MUTLAKA JSON formatında döndür. Başka hiçbir şey yazma, sadece JSON.
+
+MÜŞTERİ: ${musteri}
+H�ZMET: ${hizmet}
+HEDEF: ${hedef||'Belirtilmedi'}
+TARİH: ${tarih}
+ARAÇ / BULGULAR:
+${aracCiktisi}
+EK NOTLAR: ${notlar||'Yok'}
+
+JSON formatı tam olarak şu olmalı:
+{
+  "yonetici_ozeti": "2-3 paragraf yönetici özeti",
+  "kapsam": "test kapsamı ve metodoloji açıklaması",
+  "genel_risk_skoru": 7.5,
+  "zafiyetler": [
+    {
+      "baslik": "Zafiyet adı",
+      "seviye": "kritik|yuksek|orta|dusuk",
+      "cvss": 9.1,
+      "etkilenen_alan": "/login endpoint",
+      "aciklama": "Teknik açıklama",
+      "etki": "İş etkisi",
+      "kanit": "PoC / reproduksiyon adımları",
+      "oneri": "Düzeltme önerisi"
+    }
+  ],
+  "genel_degerlendirme": "Genel güvenlik olgunluk seviyesi değerlendirmesi",
+  "oncelikli_adimlar": ["1. adım", "2. adım", "3. adım"],
+  "sonuc": "Kapanış paragrafı"
+}`;
+
+  try {
+    var res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-6',
+        max_tokens:1000,
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+    var data = await res.json();
+    var raw = data.content ? data.content.map(function(c){return c.text||'';}).join('') : '';
+
+    clearInterval(adimTimer);
+
+    // JSON parse
+    var rapor;
+    try {
+      var jsonStr = raw.replace(/```json|```/g,'').trim();
+      rapor = JSON.parse(jsonStr);
+    } catch(e){
+      // JSON alınamazsa düz metin göster
+      rapor = null;
+    }
+
+    // Aşamaları tamamla
+    document.querySelectorAll('.asama').forEach(a=>a.classList.remove('active'));
+    document.querySelectorAll('.asama').forEach(a=>a.classList.add('done'));
+    document.getElementById('loading-box').style.display='none';
+    document.getElementById('rapor-alani').style.display='block';
+
+    if(rapor){
+      renderRapor(rapor, musteri, hizmet, tarih);
+    } else {
+      document.getElementById('rapor-alani').innerHTML=`
+        <div class="rapor-blok">
+          <div class="rapor-blok-head"><h3>AI Rapor Çıktısı</h3></div>
+          <div class="rapor-blok-icerik">${raw}</div>
+        </div>`;
+    }
+
+    // Kaydet
+    var raporlar = JSON.parse(localStorage.getItem('rc_raporlar')||'[]');
+    raporlar.push({
+      id:'R'+String(raporlar.length+1).padStart(3,'0'),
+      ad:musteri, hizmet, tarih,
+      icerik: rapor ? JSON.stringify(rapor) : raw,
+      tip: rapor ? 'json' : 'text'
+    });
+    localStorage.setItem('rc_raporlar', JSON.stringify(raporlar));
+
+    document.getElementById('pdf-btn').style.display='block';
+
+  } catch(e){
+    clearInterval(adimTimer);
+    document.getElementById('loading-box').innerHTML=`<p style="color:var(--red);font-size:13px">Hata: ${e.message}</p>`;
+  }
+
+  btn.disabled=false;
+  btn.innerHTML='<i class="ti ti-sparkles"></i> Tekrar Üret';
+}
+
+function renderRapor(r, musteri, hizmet, tarih){
+  // Risk sayım
+  var say = {kritik:0, yuksek:0, orta:0, dusuk:0};
+  (r.zafiyetler||[]).forEach(function(z){ if(say[z.seviye]!==undefined) say[z.seviye]++; });
+
+  var sevBadge = function(s){
+    var cls={kritik:'sev-kritik',yuksek:'sev-yuksek',orta:'sev-orta',dusuk:'sev-dusuk'};
+    var lbl={kritik:'Kritik',yuksek:'Yüksek',orta:'Orta',dusuk:'Düşük'};
+    return '<span class="sev-badge '+cls[s]+'">'+lbl[s]+'</span>';
+  };
+
+  var html = `
+    <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:0.5px solid var(--line2)">
+      <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--red);letter-spacing:0.2em;text-transform:uppercase;margin-bottom:8px">GÜVENLİK DEĞERLENDİRME RAPORU</div>
+      <div style="font-size:18px;font-weight:700;margin-bottom:4px">${musteri}</div>
+      <div style="font-size:12px;color:var(--muted)">${hizmet} · ${tarih} · REDCELL AR-GE</div>
+      ${r.genel_risk_skoru ? `<div style="margin-top:10px;display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border:0.5px solid var(--red);font-family:'Space Mono',monospace;font-size:11px;color:var(--red)">GENEL RİSK SKORU: ${r.genel_risk_skoru}/10</div>` : ''}
+    </div>
+
+    <div class="risk-matrix">
+      <div class="risk-cell risk-kritik"><div class="r-num">${say.kritik}</div><div class="r-label">Kritik</div></div>
+      <div class="risk-cell risk-yuksek"><div class="r-num">${say.yuksek}</div><div class="r-label">Yüksek</div></div>
+      <div class="risk-cell risk-orta"><div class="r-num">${say.orta}</div><div class="r-label">Orta</div></div>
+      <div class="risk-cell risk-dusuk"><div class="r-num">${say.dusuk}</div><div class="r-label">Düşük</div></div>
+    </div>
+
+    <div class="rapor-blok">
+      <div class="rapor-blok-head"><h3><i class="ti ti-chart-bar" style="margin-right:6px"></i>Yönetici Özeti</h3></div>
+      <div class="rapor-blok-icerik">${r.yonetici_ozeti||''}</div>
+    </div>
+
+    <div class="rapor-blok">
+      <div class="rapor-blok-head"><h3><i class="ti ti-target" style="margin-right:6px"></i>Kapsam & Metodoloji</h3></div>
+      <div class="rapor-blok-icerik">${r.kapsam||''}</div>
+    </div>
+
+    <div class="rapor-blok">
+      <div class="rapor-blok-head">
+        <h3><i class="ti ti-bug" style="margin-right:6px"></i>Tespit Edilen Zafiyetler</h3>
+        <span style="font-size:11px;color:var(--muted)">${(r.zafiyetler||[]).length} bulgu</span>
+      </div>
+      <div style="padding:12px">
+        ${(r.zafiyetler||[]).map(function(z,i){
+          return `<div class="zaf-kart">
+            <div class="zaf-head" onclick="toggleZaf(${i})">
+              ${sevBadge(z.seviye)}
+              <span class="zaf-baslik">${z.baslik}</span>
+              <span class="cvss-chip">CVSS ${z.cvss}</span>
+              <i class="ti ti-chevron-down" style="font-size:14px;color:var(--faint);margin-left:8px"></i>
+            </div>
+            <div class="zaf-detay" id="zd-${i}">
+              <div class="zaf-detay-row"><strong>Etkilenen Alan</strong><span>${z.etkilenen_alan||'—'}</span></div>
+              <div class="zaf-detay-row"><strong>Açıklama</strong><span>${z.aciklama||''}</span></div>
+              <div class="zaf-detay-row"><strong>İş Etkisi</strong><span>${z.etki||''}</span></div>
+              <div class="zaf-detay-row"><strong>Kanıt / PoC</strong><span>${z.kanit||'—'}</span></div>
+              <div class="zaf-detay-row" style="margin-bottom:0"><strong>Öneri</strong><span style="color:var(--green)">${z.oneri||''}</span></div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+
+    <div class="rapor-blok">
+      <div class="rapor-blok-head"><h3><i class="ti ti-shield" style="margin-right:6px"></i>Genel Değerlendirme</h3></div>
+      <div class="rapor-blok-icerik">${r.genel_degerlendirme||''}</div>
+    </div>
+
+    ${r.oncelikli_adimlar && r.oncelikli_adimlar.length ? `
+    <div class="rapor-blok">
+      <div class="rapor-blok-head"><h3><i class="ti ti-list-check" style="margin-right:6px"></i>Öncelikli Düzeltme Adımları</h3></div>
+      <div style="padding:16px">
+        ${r.oncelikli_adimlar.map(function(a,i){
+          return `<div style="display:flex;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--line);font-size:13px;color:var(--muted)">
+            <span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--red);flex-shrink:0;min-width:20px">${String(i+1).padStart(2,'0')}</span>
+            <span>${a}</span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>` : ''}
+
+    <div class="rapor-blok">
+      <div class="rapor-blok-head"><h3><i class="ti ti-notes" style="margin-right:6px"></i>Sonuç</h3></div>
+      <div class="rapor-blok-icerik">${r.sonuc||''}</div>
+    </div>
+
+    <div style="padding:16px;border:0.5px solid var(--line2);font-size:11px;color:var(--faint);text-align:center;font-family:'Space Mono',monospace">
+      Bu rapor REDCELL AR-GE tarafından gizlilik sözleşmesi kapsamında hazırlanmıştır. · ${new Date().toLocaleDateString('tr-TR')}
+    </div>`;
+
+  document.getElementById('rapor-alani').innerHTML = html;
+  window._raporData = r;
+  window._raporMeta = {musteri, hizmet, tarih};
+}
+
+function toggleZaf(i){
+  var el = document.getElementById('zd-'+i);
+  el.classList.toggle('open');
+}
+
+// PDF İNDİR
+function pdfIndir(){
+  var musteri = (window._raporMeta||{}).musteri || 'Rapor';
+  var hizmet  = (window._raporMeta||{}).hizmet  || '';
+  var tarih   = (window._raporMeta||{}).tarih   || new Date().toISOString().slice(0,10);
+  var r = window._raporData;
+  if(!r){ alert('Önce rapor üretin.'); return; }
+
+  var say = {kritik:0,yuksek:0,orta:0,dusuk:0};
+  (r.zafiyetler||[]).forEach(function(z){ if(say[z.seviye]!==undefined) say[z.seviye]++; });
+
+  var sevRenk = {kritik:'#c0392b',yuksek:'#e67e22',orta:'#2980b9',dusuk:'#27ae60'};
+
+  var html = `<!DOCTYPE html><html lang="tr"><head><meta charset="UTF-8">
+<title>REDCELL Güvenlik Raporu — ${musteri}</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Courier New',monospace;background:#fff;color:#111;padding:48px;max-width:900px;margin:0 auto;font-size:12px;line-height:1.7}
+  .header{border-bottom:2px solid #c0392b;padding-bottom:20px;margin-bottom:28px}
+  .header h1{font-size:22px;font-weight:700;letter-spacing:-0.01em;margin-bottom:4px}
+  .header .sub{font-size:11px;color:#666}
+  .header .red-label{font-size:10px;color:#c0392b;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:10px}
+  .risk-row{display:flex;gap:0;margin:20px 0;border:1px solid #eee}
+  .risk-box{flex:1;padding:14px;text-align:center;border-right:1px solid #eee}
+  .risk-box:last-child{border-right:none}
+  .risk-box .n{font-size:28px;font-weight:700}
+  .risk-box .l{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;margin-top:2px}
+  h2{font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:#c0392b;border-bottom:0.5px solid #eee;padding-bottom:6px;margin:24px 0 12px}
+  .zafiyet{border:1px solid #eee;margin-bottom:12px;page-break-inside:avoid}
+  .zaf-head{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#fafafa;border-bottom:1px solid #eee}
+  .sev{font-size:10px;padding:2px 8px;letter-spacing:0.08em;text-transform:uppercase;border:1px solid}
+  .zaf-body{padding:12px 14px}
+  .zaf-row{display:grid;grid-template-columns:130px 1fr;gap:6px;margin-bottom:6px;font-size:11px}
+  .zaf-row strong{color:#888;text-transform:uppercase;letter-spacing:0.08em;font-size:10px}
+  .oneri{margin-top:8px;padding:8px 10px;background:#f8fdf8;border-left:3px solid #27ae60;font-size:11px}
+  .adim-list{list-style:none;padding:0}
+  .adim-list li{display:flex;gap:10px;padding:8px 0;border-bottom:0.5px solid #f0f0f0;font-size:12px}
+  .adim-list li span:first-child{color:#c0392b;font-weight:700;min-width:24px}
+  .footer{margin-top:36px;padding-top:16px;border-top:1px solid #eee;font-size:10px;color:#aaa;text-align:center}
+  p{margin-bottom:10px;color:#333}
+  @media print{body{padding:24px}.header{break-after:avoid}}
+</style></head><body>
+<div class="header">
+  <div class="red-label">Gizli — Güvenlik Değerlendirme Raporu</div>
+  <h1>${musteri}</h1>
+  <div class="sub">${hizmet} · ${tarih} · REDCELL AR-GE</div>
+  ${r.genel_risk_skoru ? `<div style="margin-top:10px;display:inline-block;padding:4px 12px;border:1px solid #c0392b;color:#c0392b;font-size:10px;letter-spacing:0.1em">GENEL RİSK SKORU: ${r.genel_risk_skoru}/10</div>` : ''}
+</div>
+
+<div class="risk-row">
+  <div class="risk-box"><div class="n" style="color:#c0392b">${say.kritik}</div><div class="l" style="color:#c0392b">Kritik</div></div>
+  <div class="risk-box"><div class="n" style="color:#e67e22">${say.yuksek}</div><div class="l" style="color:#e67e22">Yüksek</div></div>
+  <div class="risk-box"><div class="n" style="color:#2980b9">${say.orta}</div><div class="l" style="color:#2980b9">Orta</div></div>
+  <div class="risk-box"><div class="n" style="color:#27ae60">${say.dusuk}</div><div class="l" style="color:#27ae60">Düşük</div></div>
+</div>
+
+<h2>Yönetici Özeti</h2>
+<p>${(r.yonetici_ozeti||'').replace(/\n/g,'</p><p>')}</p>
+
+<h2>Kapsam & Metodoloji</h2>
+<p>${(r.kapsam||'').replace(/\n/g,'</p><p>')}</p>
+
+<h2>Tespit Edilen Zafiyetler</h2>
+${(r.zafiyetler||[]).map(function(z){
+  var renk = sevRenk[z.seviye]||'#888';
+  var lbl = {kritik:'KRİTİK',yuksek:'YÜKSEK',orta:'ORTA',dusuk:'DÜŞÜK'};
+  return `<div class="zafiyet">
+    <div class="zaf-head">
+      <span class="sev" style="color:${renk};border-color:${renk}">${lbl[z.seviye]||z.seviye}</span>
+      <strong style="flex:1;font-size:12px">${z.baslik}</strong>
+      <span style="font-size:10px;color:#888">CVSS ${z.cvss}</span>
+    </div>
+    <div class="zaf-body">
+      ${z.etkilenen_alan?`<div class="zaf-row"><strong>Etkilenen Alan</strong><span>${z.etkilenen_alan}</span></div>`:''}
+      <div class="zaf-row"><strong>Açıklama</strong><span>${z.aciklama||''}</span></div>
+      <div class="zaf-row"><strong>İş Etkisi</strong><span>${z.etki||''}</span></div>
+      ${z.kanit?`<div class="zaf-row"><strong>Kanıt / PoC</strong><span>${z.kanit}</span></div>`:''}
+      <div class="oneri"><strong style="color:#27ae60">Öneri:</strong> ${z.oneri||''}</div>
+    </div>
+  </div>`;
+}).join('')}
+
+<h2>Genel Değerlendirme</h2>
+<p>${(r.genel_degerlendirme||'').replace(/\n/g,'</p><p>')}</p>
+
+${r.oncelikli_adimlar && r.oncelikli_adimlar.length ? `
+<h2>Öncelikli Düzeltme Adımları</h2>
+<ul class="adim-list">
+  ${r.oncelikli_adimlar.map(function(a,i){return `<li><span>${String(i+1).padStart(2,'0')}</span><span>${a}</span></li>`;}).join('')}
+</ul>` : ''}
+
+<h2>Sonuç</h2>
+<p>${(r.sonuc||'').replace(/\n/g,'</p><p>')}</p>
+
+<div class="footer">
+  Bu rapor REDCELL AR-GE tarafından hazırlanmıştır. Gizlilik sözleşmesi kapsamındadır. Üçüncü şahıslarla paylaşılamaz. · ${new Date().toLocaleDateString('tr-TR')}
+</div>
+<script>window.onload=function(){window.print();}<\/script>
+</body></html>`;
+
+  var win = window.open('','_blank');
+  win.document.write(html);
+  win.document.close();
+}
+</script>
+</body>
+</html>

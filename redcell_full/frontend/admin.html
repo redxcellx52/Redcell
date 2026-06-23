@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"/>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>REDCELL Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--red:#c0392b;--red-d:#a93226;--bg:#0a0a0a;--bg2:#0f0f0f;--bg3:#141414;--line:#1a1a1a;--line2:#2a2a2a;--text:#e8e8e0;--muted:#888;--faint:#555;--green:#27ae60;--amber:#e67e22;--blue:#2980b9;}
+body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+#login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999}
+.login-box{width:380px;border:0.5px solid var(--line2);padding:48px 40px}
+.login-logo{font-family:'Space Mono',monospace;font-size:16px;font-weight:700;letter-spacing:0.15em;margin-bottom:36px}
+.login-logo span{color:var(--red)}
+.login-box h2{font-size:20px;font-weight:500;margin-bottom:8px}
+.login-box p{font-size:13px;color:var(--muted);margin-bottom:32px}
+.field{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.field label{font-family:'Space Mono',monospace;font-size:11px;color:var(--faint);letter-spacing:0.1em;text-transform:uppercase}
+.field input,.field select,.field textarea{background:var(--bg2);border:0.5px solid var(--line2);color:var(--text);padding:11px 13px;font-family:'Space Grotesk',sans-serif;font-size:14px;outline:none;transition:border-color 0.2s;width:100%}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--red)}
+.field textarea{resize:vertical;min-height:90px}
+.field select option{background:#1a1a1a}
+.login-btn{width:100%;padding:14px;background:var(--red);color:#fff;border:none;font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;margin-top:8px}
+.login-btn:hover{background:var(--red-d)}
+.login-hint{font-size:12px;color:var(--faint);margin-top:16px;font-family:'Space Mono',monospace}
+#app{display:none;min-height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:52px;border-bottom:0.5px solid var(--line2);background:rgba(10,10,10,0.97);position:sticky;top:0;z-index:200;backdrop-filter:blur(10px)}
+.top-logo{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;letter-spacing:0.15em}
+.top-logo span{color:var(--red)}
+.top-r{display:flex;align-items:center;gap:10px}
+.tbtn{font-family:'Space Mono',monospace;font-size:10px;padding:7px 14px;border:0.5px solid var(--line2);color:var(--muted);background:none;cursor:pointer;letter-spacing:0.08em;text-transform:uppercase;transition:all 0.2s}
+.tbtn:hover{border-color:var(--muted);color:var(--text)}
+.layout{display:flex;min-height:calc(100vh - 52px)}
+.sidebar{width:210px;background:var(--bg2);border-right:0.5px solid var(--line);display:flex;flex-direction:column;flex-shrink:0}
+.sidebar-nav{flex:1;padding:12px 0}
+.nav-sec{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--faint);padding:16px 18px 6px}
+.nitem{display:flex;align-items:center;gap:9px;padding:10px 18px;font-size:13px;color:var(--muted);cursor:pointer;transition:all 0.15s;border-left:2px solid transparent;text-decoration:none}
+.nitem i{font-size:16px;flex-shrink:0}
+.nitem:hover{color:var(--text);background:var(--bg3)}
+.nitem.active{color:var(--text);border-left-color:var(--red);background:var(--bg3)}
+.nitem .nbadge{margin-left:auto;font-family:'Space Mono',monospace;font-size:10px;background:var(--red);color:#fff;padding:1px 6px;min-width:18px;text-align:center}
+.sidebar-foot{padding:14px 18px;border-top:0.5px solid var(--line);font-size:11px;color:var(--faint)}
+.main{flex:1;overflow-y:auto;max-height:calc(100vh - 52px)}
+.page{display:none;padding:28px}
+.page.active{display:block}
+.page-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+.page-head h1{font-size:16px;font-weight:500}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);margin-bottom:28px}
+.stat-card{background:var(--bg);padding:20px 18px;cursor:pointer;transition:background 0.2s}
+.stat-card:hover{background:var(--bg2)}
+.sc-label{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--faint);margin-bottom:8px}
+.sc-val{font-family:'Space Mono',monospace;font-size:26px;font-weight:700;line-height:1}
+.sc-sub{font-size:11px;color:var(--faint);margin-top:5px}
+.c-red{color:var(--red)}.c-amber{color:var(--amber)}.c-blue{color:var(--blue)}.c-green{color:var(--green)}
+.tbl-wrap{background:var(--bg);border:0.5px solid var(--line2);margin-bottom:24px;overflow:hidden}
+.tbl-head-row{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:0.5px solid var(--line)}
+.tbl-head-row h3{font-size:13px;font-weight:500}
+table{width:100%;border-collapse:collapse}
+th{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--faint);padding:11px 14px;text-align:left;border-bottom:0.5px solid var(--line)}
+td{padding:12px 14px;font-size:13px;color:var(--muted);border-bottom:0.5px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--bg2);color:var(--text)}
+.td-main{color:var(--text);font-weight:500}
+.abtn{font-family:'Space Mono',monospace;font-size:10px;padding:4px 10px;border:0.5px solid var(--line2);color:var(--muted);background:none;cursor:pointer;transition:all 0.2s;margin-right:3px;text-decoration:none;display:inline-block}
+.abtn:hover{border-color:var(--red);color:var(--red)}
+.abtn.go{border-color:var(--green);color:var(--green)}
+.abtn.go:hover{background:var(--green);color:#0a0a0a}
+.badge{font-family:'Space Mono',monospace;font-size:10px;padding:3px 9px;letter-spacing:0.06em}
+.b-amber{background:rgba(230,126,34,.1);color:var(--amber);border:0.5px solid rgba(230,126,34,.35)}
+.b-blue{background:rgba(41,128,185,.1);color:var(--blue);border:0.5px solid rgba(41,128,185,.35)}
+.b-green{background:rgba(39,174,96,.1);color:var(--green);border:0.5px solid rgba(39,174,96,.35)}
+.b-gray{background:rgba(136,136,136,.1);color:var(--muted);border:0.5px solid rgba(136,136,136,.25)}
+.bil-liste{display:flex;flex-direction:column;gap:1px;background:var(--line)}
+.bil-item{background:var(--bg);padding:14px 18px;display:flex;gap:12px;align-items:flex-start;cursor:pointer;transition:background 0.15s;border-left:2px solid transparent}
+.bil-item:hover{background:var(--bg2)}
+.bil-item.okunmadi{border-left-color:var(--red)}
+.bil-icon{width:34px;height:34px;border:0.5px solid var(--line2);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.bil-icon.talep{color:var(--amber)}.bil-icon.rapor{color:var(--green)}.bil-icon.durum{color:var(--blue)}.bil-icon.sistem{color:var(--muted)}
+.bil-info{flex:1}
+.bil-baslik{font-size:13px;font-weight:500;color:var(--text);margin-bottom:3px}
+.bil-mesaj{font-size:12px;color:var(--muted)}
+.bil-tarih{font-family:'Space Mono',monospace;font-size:10px;color:var(--faint);margin-top:4px}
+.bil-dot{width:7px;height:7px;background:var(--red);border-radius:50%;flex-shrink:0;margin-top:5px}
+.ekip-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1px;background:var(--line);margin-bottom:24px}
+.ekip-kart{background:var(--bg);padding:24px;transition:background 0.2s}
+.ekip-kart:hover{background:var(--bg2)}
+.ek-avatar{width:44px;height:44px;background:var(--bg3);border:0.5px solid var(--line2);display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--red);margin-bottom:14px}
+.ek-ad{font-size:14px;font-weight:500;color:var(--text);margin-bottom:3px}
+.ek-rol{font-size:12px;color:var(--muted);margin-bottom:10px}
+.ek-certs{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px}
+.ek-cert{font-family:'Space Mono',monospace;font-size:10px;padding:2px 7px;background:rgba(192,57,43,.07);color:var(--red);border:0.5px solid rgba(192,57,43,.2)}
+.ayar-blok{background:var(--bg);border:0.5px solid var(--line2);margin-bottom:16px}
+.ayar-blok-head{padding:14px 18px;border-bottom:0.5px solid var(--line);font-size:13px;font-weight:500}
+.ayar-row{display:flex;justify-content:space-between;align-items:center;padding:13px 18px;border-bottom:0.5px solid var(--line);font-size:13px}
+.ayar-row:last-child{border-bottom:none}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;z-index:500}
+.modal-bg.open{display:flex}
+.modal{background:var(--bg2);border:0.5px solid var(--line2);width:560px;max-width:95vw;max-height:90vh;overflow-y:auto}
+.modal-head{display:flex;justify-content:space-between;align-items:center;padding:18px 22px;border-bottom:0.5px solid var(--line)}
+.modal-head h3{font-size:15px;font-weight:500}
+.mx{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1}
+.mx:hover{color:var(--text)}
+.modal-body{padding:22px}
+.modal-foot{padding:14px 22px;border-top:0.5px solid var(--line);display:flex;justify-content:flex-end;gap:8px}
+.sec-btn{font-family:'Space Mono',monospace;font-size:10px;padding:8px 18px;border:0.5px solid var(--line2);color:var(--muted);background:none;cursor:pointer;letter-spacing:0.08em;text-transform:uppercase;transition:all 0.2s}
+.sec-btn:hover{border-color:var(--muted);color:var(--text)}
+.sec-btn.primary{background:var(--red);color:#fff;border-color:var(--red)}
+.sec-btn.primary:hover{background:var(--red-d)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.ai-box{background:var(--bg3);border:0.5px solid var(--line2);padding:20px;margin-top:16px}
+.ai-head{font-family:'Space Mono',monospace;font-size:10px;color:var(--red);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.ai-out{font-size:13px;color:var(--muted);line-height:1.8;white-space:pre-wrap;max-height:400px;overflow-y:auto}
+@keyframes ai-p{0%,100%{opacity:.3}50%{opacity:1}}
+.aidot{width:7px;height:7px;background:var(--red);border-radius:50%;animation:ai-p 1s infinite;display:inline-block;margin:0 2px}
+.aidot:nth-child(2){animation-delay:.2s}.aidot:nth-child(3){animation-delay:.4s}
+.empty{text-align:center;padding:40px;color:var(--faint);font-size:13px}
+.empty i{font-size:36px;display:block;margin-bottom:10px;color:var(--line2)}
+.toast{position:fixed;bottom:24px;right:24px;padding:11px 18px;font-family:'Space Mono',monospace;font-size:11px;z-index:9999;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.grafik-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.grafik-label{font-size:12px;color:var(--muted);width:160px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.grafik-bar-wrap{flex:1;height:4px;background:var(--line2)}
+.grafik-bar-fill{height:100%;transition:width 0.6s ease}
+.grafik-sayi{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);width:24px;text-align:right}
+</style>
+<script src="/static/rc-api.js">
+async function tfaDurumYukle(){
+  try{
+    const d = await RC._fetch('/auth/2fa/durum');
+    const badge = document.getElementById('tfa-durum-badge');
+    const btnAc = document.getElementById('tfa-btn-ac');
+    const btnKapat = document.getElementById('tfa-btn-kapat');
+    if(d.tfa_aktif){
+      badge.textContent='AKTİF'; badge.style.color='var(--green)';
+      btnAc.style.display='none'; btnKapat.style.display='inline-block';
+    } else {
+      badge.textContent='PASİF'; badge.style.color='var(--muted)';
+      btnAc.style.display='inline-block'; btnKapat.style.display='none';
+    }
+  }catch(e){}
+}
+
+async function tfaAktifles(){
+  const d = await RC._fetch('/auth/2fa/aktifles',{method:'POST'});
+  const qr = document.getElementById('tfa-qr');
+  qr.src = 'data:image/png;base64,' + d.qr_kodu;
+  qr.style.display='block';
+  document.getElementById('tfa-panel').style.display='block';
+  document.getElementById('tfa-btn-dogrula').style.display='inline-block';
+  document.getElementById('tfa-btn-ac').style.display='none';
+  toast('QR kodu Authenticator uygulamasına tara');
+}
+
+async function tfaDogrula(){
+  const kod = document.getElementById('tfa-kod').value.trim();
+  if(kod.length!==6){toast('6 haneli kod gir');return;}
+  try{
+    await RC._fetch('/auth/2fa/dogrula',{method:'POST',body:JSON.stringify({kod})});
+    toast('2FA aktif edildi ✅');
+    document.getElementById('tfa-panel').style.display='none';
+    tfaDurumYukle();
+  }catch(e){toast('Hatalı kod, tekrar dene');}
+}
+
+async function tfaKapat(){
+  const sifre = prompt('Güvenlik için şifrenizi girin:');
+  if(!sifre) return;
+  try{
+    await RC._fetch('/auth/2fa/kapat',{method:'POST',body:JSON.stringify({sifre})});
+    toast('2FA devre dışı bırakıldı');
+    tfaDurumYukle();
+  }catch(e){toast('Şifre hatalı');}
+}
+
+
+
+// ============================================================
+// WIDGET SİSTEMİ
+// ============================================================
+var _widgetDurumlar = JSON.parse(localStorage.getItem('rc_widgets') ||
+  '{"cpu":true,"bellek":true,"disk":true,"sicaklik":true,"projeler":true,"ekip":true,"ajanlar":true,"gelir":true}');
+
+function widgetToggle(id){
+  _widgetDurumlar[id] = !_widgetDurumlar[id];
+  localStorage.setItem('rc_widgets', JSON.stringify(_widgetDurumlar));
+  _widgetUygula();
+}
+
+function _widgetUygula(){
+  Object.keys(_widgetDurumlar).forEach(function(id){
+    var el = document.getElementById('w-' + id);
+    var btn = document.getElementById('wt-' + id);
+    if(el){ el.classList.toggle('gizli', !_widgetDurumlar[id]); }
+    if(btn){ btn.classList.toggle('aktif', _widgetDurumlar[id]); }
+  });
+}
+
+async function widgetleriGuncelle(){
+  try{
+    var d = await RC._fetch('/sistem/durum');
+    // CPU
+    var cpu = d.donanim.cpu;
+    document.getElementById('w-cpu-val').textContent = cpu.yuzde + '%';
+    document.getElementById('w-cpu-val').className = 'widget-val widget-durum-' + cpu.durum;
+    document.getElementById('w-cpu-sub').textContent = 'durum: ' + cpu.durum;
+    // Bellek
+    var bel = d.donanim.bellek;
+    document.getElementById('w-bellek-val').textContent = bel.yuzde + '%';
+    document.getElementById('w-bellek-val').className = 'widget-val widget-durum-' + bel.durum;
+    document.getElementById('w-bellek-sub').textContent = bel.kullanilan + ' / ' + bel.toplam;
+    // Disk
+    var disk = d.donanim.disk;
+    document.getElementById('w-disk-val').textContent = disk.yuzde + '%';
+    document.getElementById('w-disk-val').className = 'widget-val widget-durum-' + disk.durum;
+    document.getElementById('w-disk-sub').textContent = disk.kullanilan + ' / ' + disk.toplam;
+    // Sıcaklık
+    var sic = d.donanim.sicaklik;
+    var sicVal = sic.deger ? sic.deger + '°C' : 'N/A';
+    document.getElementById('w-sicaklik-val').textContent = sicVal;
+    if(sic.deger) document.getElementById('w-sicaklik-val').className = 'widget-val widget-durum-' + sic.durum;
+    document.getElementById('w-sicaklik-sub').textContent = 'uptime: ' + d.donanim.uptime;
+    // Projeler
+    var prj = d.projeler;
+    document.getElementById('w-projeler-val').textContent = prj.devam;
+    document.getElementById('w-projeler-sub').textContent = prj.bekleyen + ' bekleyen / ' + prj.tamamlandi + ' tamam';
+    // Ekip
+    var ekip = d.ekip;
+    document.getElementById('w-ekip-val').textContent = ekip.toplam;
+    document.getElementById('w-ekip-sub').textContent = ekip.aktif + ' aktif / ' + ekip.musait + ' müsait';
+    // Ajanlar
+    var aj = d.ajanlar;
+    document.getElementById('w-ajanlar-val').textContent = aj.durum === 'aktif' ? '● AKTİF' : '○ PASİF';
+    document.getElementById('w-ajanlar-val').style.color = aj.durum === 'aktif' ? 'var(--green)' : 'var(--muted)';
+    // Gelir
+    var gelir = d.gelir;
+    document.getElementById('w-gelir-val').textContent = '₺' + (gelir.bu_ay_tl || 0).toLocaleString('tr-TR');
+  }catch(e){ /* API bağlantısı yoksa sessiz geç */ }
+}
+
+// Widgetları başlat ve 15 saniyede güncelle
+_widgetUygula();
+setInterval(widgetleriGuncelle, 15000);
+
+// ============================================================
+// TAKVİM
+// ============================================================
+var _takvimYil = new Date().getFullYear();
+var _takvimAy  = new Date().getMonth();
+var _etkinlikler = [];
+var _onayBekleyenKomut = null;
+
+var AYLAR = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran',
+             'Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+
+async function takvimYukle(){
+  try{
+    var bas = new Date(_takvimYil, _takvimAy, 1).toISOString().slice(0,10);
+    var bit = new Date(_takvimYil, _takvimAy + 1, 0).toISOString().slice(0,10);
+    _etkinlikler = await RC._fetch('/v1/takvim?baslangic=' + bas + '&bitis=' + bit);
+  }catch(e){ _etkinlikler = []; }
+  takvimRender();
+}
+
+function takvimRender(){
+  document.getElementById('takvim-ay-adi').textContent = AYLAR[_takvimAy] + ' ' + _takvimYil;
+  var ilkGun = new Date(_takvimYil, _takvimAy, 1);
+  var sonGun = new Date(_takvimYil, _takvimAy + 1, 0);
+  var bugun  = new Date();
+  // Pazartesi = 0
+  var baslangicOffset = (ilkGun.getDay() + 6) % 7;
+  var gunler = document.getElementById('takvim-gunler');
+  gunler.innerHTML = '';
+
+  // Önceki aydan günler
+  for(var i = 0; i < baslangicOffset; i++){
+    var g = new Date(_takvimYil, _takvimAy, 1 - (baslangicOffset - i));
+    gunler.appendChild(_takvimGunEl(g, true, bugun));
+  }
+  // Bu ayın günleri
+  for(var d = 1; d <= sonGun.getDate(); d++){
+    var g = new Date(_takvimYil, _takvimAy, d);
+    gunler.appendChild(_takvimGunEl(g, false, bugun));
+  }
+  // Sonraki aydan tamamla (42 hücre)
+  var kalan = 42 - (baslangicOffset + sonGun.getDate());
+  for(var i = 1; i <= kalan; i++){
+    var g = new Date(_takvimYil, _takvimAy + 1, i);
+    gunler.appendChild(_takvimGunEl(g, true, bugun));
+  }
+
+  // Yaklaşan etkinlikler
+  var yakin = (_etkinlikler || []).slice(0,10);
+  var yakinEl = document.getElementById('yakin-etkinlikler');
+  document.getElementById('yakin-sayi').textContent = yakin.length + ' etkinlik';
+  yakinEl.innerHTML = yakin.length ? yakin.map(function(e){
+    var t = new Date(e.baslangic);
+    return '<div class="yakin-item">' +
+      '<div class="y-tarih">' + t.toLocaleDateString('tr-TR') + ' ' + t.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'}) + '</div>' +
+      '<div class="y-baslik">' + e.baslik + '</div></div>';
+  }).join('') : '<div class="empty" style="padding:20px"><i class="ti ti-calendar-off"></i>Etkinlik yok</div>';
+}
+
+function _takvimGunEl(tarih, baskaAy, bugun){
+  var div = document.createElement('div');
+  div.className = 'takvim-gun' + (baskaAy ? ' baska-ay' : '') +
+    (tarih.toDateString() === bugun.toDateString() ? ' bugun' : '');
+  var noDiv = document.createElement('div');
+  noDiv.className = 'gun-no';
+  noDiv.textContent = tarih.getDate();
+  div.appendChild(noDiv);
+  // O güne ait etkinlikleri ekle
+  var tarihStr = tarih.toISOString().slice(0,10);
+  (_etkinlikler || []).filter(function(e){
+    return (e.baslangic || '').slice(0,10) === tarihStr;
+  }).forEach(function(e){
+    var ev = document.createElement('div');
+    var renk = e.tip === 'rapor' ? 'yesil' : e.tip === 'toplanti' ? 'mavi' : '';
+    ev.className = 'takvim-etkinlik ' + renk;
+    ev.textContent = e.baslik;
+    ev.title = e.aciklama || e.baslik;
+    div.appendChild(ev);
+  });
+  div.onclick = function(){ etkinlikGunuSec(tarih); };
+  return div;
+}
+
+function takvimOncekiAy(){
+  _takvimAy--;
+  if(_takvimAy < 0){ _takvimAy = 11; _takvimYil--; }
+  takvimYukle();
+}
+function takvimSonrakiAy(){
+  _takvimAy++;
+  if(_takvimAy > 11){ _takvimAy = 0; _takvimYil++; }
+  takvimYukle();
+}
+function takvimBuAy(){
+  _takvimYil = new Date().getFullYear();
+  _takvimAy  = new Date().getMonth();
+  takvimYukle();
+}
+
+function etkinlikGunuSec(tarih){
+  document.getElementById('etkinlik-tarih') && (document.getElementById('etkinlik-tarih').value = tarih.toISOString().slice(0,16));
+}
+
+async function etkinlikEkleModal(){
+  var baslik = prompt('Etkinlik başlığı:');
+  if(!baslik) return;
+  var tarihStr = prompt('Tarih ve saat (YYYY-MM-DDTHH:MM):', new Date().toISOString().slice(0,16));
+  if(!tarihStr) return;
+  try{
+    await RC._fetch('/v1/takvim', {method:'POST', body:JSON.stringify({baslik, baslangic:tarihStr, tip:'pentest'})});
+    toast('Etkinlik eklendi');
+    takvimYukle();
+  }catch(e){ toast('Hata: ' + e.message); }
+}
+
+// ============================================================
+// KONSOL
+// ============================================================
+var _konsolMod = 'whitelist';
+var _konsolGecmis = [];
+var _konsolGecmisIdx = -1;
+
+async function konsolSayfaAc(){
+  // Whitelist komutları yükle
+  try{
+    var komutlar = await RC._fetch('/konsol/komutlar');
+    var el = document.getElementById('konsol-whitelist');
+    el.innerHTML = komutlar.map(function(k){
+      return '<div class="konsol-cmd" onclick="konsolCalistirHazir(\'' + k.komut.replace(/'/g,"\'") + '\')">' +
+        k.komut + (k.onay ? '<br><span class="kc-onay">⚠ Onay</span>' : '') +
+        '</div>';
+    }).join('');
+  }catch(e){}
+  // 2FA durumu
+  try{
+    var tfa = await RC._fetch('/auth/2fa/durum');
+    var badge = document.getElementById('konsol-tfa-badge');
+    badge.textContent = '2FA: ' + (tfa.tfa_aktif ? 'AKTİF ✓' : 'PASİF');
+    badge.style.color = tfa.tfa_aktif ? 'var(--green)' : 'var(--muted)';
+  }catch(e){}
+}
+
+function konsolMod(mod){
+  _konsolMod = mod;
+  document.getElementById('kmod-whitelist').classList.toggle('aktif', mod === 'whitelist');
+  document.getElementById('kmod-serbest').classList.toggle('aktif', mod === 'serbest');
+  konsolYaz('# Mod değişti: ' + (mod === 'whitelist' ? 'Whitelist Mod' : 'Serbest Mod (2FA gerekli)') + '\n');
+}
+
+function konsolCalistirHazir(komut){
+  document.getElementById('konsol-input').value = komut;
+  document.getElementById('konsol-input').focus();
+}
+
+function konsolKeyDown(e){
+  if(e.key === 'Enter'){ konsolGonder(); }
+  if(e.key === 'ArrowUp'){
+    e.preventDefault();
+    if(_konsolGecmisIdx < _konsolGecmis.length - 1){
+      _konsolGecmisIdx++;
+      document.getElementById('konsol-input').value = _konsolGecmis[_konsolGecmis.length - 1 - _konsolGecmisIdx];
+    }
+  }
+  if(e.key === 'ArrowDown'){
+    e.preventDefault();
+    if(_konsolGecmisIdx > 0){
+      _konsolGecmisIdx--;
+      document.getElementById('konsol-input').value = _konsolGecmis[_konsolGecmis.length - 1 - _konsolGecmisIdx];
+    } else {
+      _konsolGecmisIdx = -1;
+      document.getElementById('konsol-input').value = '';
+    }
+  }
+}
+
+async function konsolGonder(){
+  var input = document.getElementById('konsol-input');
+  var komut = input.value.trim();
+  if(!komut) return;
+  input.value = '';
+  _konsolGecmis.push(komut);
+  _konsolGecmisIdx = -1;
+  konsolYaz('\nadmin@redcell:~$ ' + komut + '\n');
+  document.getElementById('konsol-durum-yazisi').textContent = 'Çalışıyor...';
+
+  try{
+    var endpoint, body;
+    if(_konsolMod === 'whitelist'){
+      endpoint = '/konsol/calistir';
+      body = {komut};
+    } else {
+      // Serbest mod — 2FA kodu iste
+      document.getElementById('konsol-tfa-satir').style.display = 'flex';
+      document.getElementById('konsol-tfa-input').value = '';
+      document.getElementById('konsol-tfa-input').focus();
+      window._bekleyenKomut = komut;
+      document.getElementById('konsol-durum-yazisi').textContent = '2FA bekleniyor';
+      return;
+    }
+    var sonuc = await RC._fetch(endpoint, {method:'POST', body:JSON.stringify(body)});
+    if(sonuc.onay_gerekli){
+      _onayBekleyenKomut = komut;
+      document.getElementById('konsol-onay-mesaj').textContent = sonuc.cikti;
+      document.getElementById('konsol-onay-satir').style.display = 'flex';
+      document.getElementById('konsol-durum-yazisi').textContent = 'Onay bekleniyor';
+    } else {
+      konsolYaz(sonuc.cikti + '\n');
+      document.getElementById('konsol-durum-yazisi').textContent = 'Hazır';
+    }
+  }catch(e){
+    konsolYaz('❌ Hata: ' + e.message + '\n', 'hata');
+    document.getElementById('konsol-durum-yazisi').textContent = 'Hata';
+  }
+}
+
+async function konsolTfaOnayla(){
+  var kod = document.getElementById('konsol-tfa-input').value.trim();
+  if(kod.length !== 6){ toast('6 haneli kod gir'); return; }
+  document.getElementById('konsol-tfa-satir').style.display = 'none';
+  var komut = window._bekleyenKomut;
+  try{
+    var sonuc = await RC._fetch('/konsol/serbest', {method:'POST', body:JSON.stringify({komut, tfa_kodu:kod})});
+    if(sonuc.durum === '2fa_gerekli'){
+      konsolYaz('🔒 2FA aktif değil. Ayarlar → 2FA bölümünden aktif edin.\n', 'uyari');
+    } else {
+      konsolYaz(sonuc.cikti + '\n');
+    }
+  }catch(e){ konsolYaz('❌ ' + e.message + '\n', 'hata'); }
+  document.getElementById('konsol-durum-yazisi').textContent = 'Hazır';
+}
+
+async function konsolOnaylaVeCalistir(){
+  document.getElementById('konsol-onay-satir').style.display = 'none';
+  if(!_onayBekleyenKomut) return;
+  try{
+    var sonuc = await RC._fetch('/konsol/calistir', {method:'POST',
+      body:JSON.stringify({komut:_onayBekleyenKomut, onaylandi:true})});
+    konsolYaz(sonuc.cikti + '\n');
+  }catch(e){ konsolYaz('❌ ' + e.message + '\n', 'hata'); }
+  document.getElementById('konsol-durum-yazisi').textContent = 'Hazır';
+  _onayBekleyenKomut = null;
+}
+
+function konsolYaz(metin, tip){
+  var el = document.getElementById('konsol-cikti');
+  if(tip){
+    var span = document.createElement('span');
+    span.className = tip;
+    span.textContent = metin;
+    el.appendChild(span);
+  } else {
+    el.textContent += metin;
+  }
+  el.scrollTop = el.scrollHeight;
+}
+
+
+</script>
+
+<style>
+/* ---- WIDGET SİSTEMİ ---- */
+.widget-bar{display:flex;gap:1px;background:var(--line);border-bottom:0.5px solid var(--line);margin-bottom:0}
+.widget-item{background:var(--bg2);padding:14px 20px;flex:1;min-width:0;position:relative;transition:all .2s}
+.widget-item.gizli{display:none}
+.widget-label{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-bottom:6px}
+.widget-val{font-family:'Space Mono',monospace;font-size:20px;font-weight:700;color:var(--text);line-height:1}
+.widget-sub{font-size:11px;color:var(--muted);margin-top:4px}
+.widget-durum-normal{color:var(--green)}
+.widget-durum-uyari{color:var(--amber)}
+.widget-durum-kritik{color:var(--red)}
+.widget-toggle-bar{display:flex;gap:8px;padding:8px 16px;background:var(--bg2);border-bottom:0.5px solid var(--line);flex-wrap:wrap;align-items:center}
+.widget-toggle-bar span{font-family:'Space Mono',monospace;font-size:9px;color:var(--faint);letter-spacing:.1em;text-transform:uppercase;margin-right:4px}
+.wtoggle{font-family:'Space Mono',monospace;font-size:9px;padding:4px 10px;border:0.5px solid var(--line2);background:none;color:var(--muted);cursor:pointer;letter-spacing:.08em;text-transform:uppercase;transition:all .2s}
+.wtoggle.aktif{border-color:var(--red);color:var(--text);background:rgba(192,57,43,.1)}
+
+/* ---- TAKVİM ---- */
+.takvim-wrap{display:grid;grid-template-columns:1fr 300px;gap:1px;background:var(--line);height:calc(100vh - 160px)}
+.takvim-grid{background:var(--bg);padding:20px;overflow-y:auto}
+.takvim-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.takvim-nav{display:flex;align-items:center;gap:12px}
+.takvim-nav button{background:none;border:0.5px solid var(--line2);color:var(--muted);width:28px;height:28px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+.takvim-nav button:hover{border-color:var(--red);color:var(--text)}
+.takvim-ay-adi{font-family:'Space Mono',monospace;font-size:13px;color:var(--text);letter-spacing:.1em}
+.takvim-haftalar{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--line)}
+.takvim-gun-adi{background:var(--bg2);text-align:center;padding:8px;font-family:'Space Mono',monospace;font-size:9px;color:var(--faint);letter-spacing:.1em}
+.takvim-gun{background:var(--bg);min-height:80px;padding:6px;position:relative;cursor:pointer;transition:background .15s}
+.takvim-gun:hover{background:var(--bg2)}
+.takvim-gun.baska-ay{opacity:.3}
+.takvim-gun.bugun .gun-no{background:var(--red);color:#fff;border-radius:0}
+.gun-no{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);width:20px;height:20px;display:flex;align-items:center;justify-content:center;margin-bottom:4px}
+.takvim-etkinlik{font-size:10px;padding:2px 5px;background:var(--red);color:#fff;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.takvim-etkinlik.mavi{background:#2980b9}
+.takvim-etkinlik.yesil{background:#27ae60}
+.takvim-yan{background:var(--bg2);display:flex;flex-direction:column}
+.takvim-yan-head{padding:14px 16px;border-bottom:0.5px solid var(--line);font-family:'Space Mono',monospace;font-size:10px;color:var(--faint);letter-spacing:.12em;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center}
+.takvim-yakin{flex:1;overflow-y:auto;padding:12px}
+.yakin-item{padding:10px 12px;border-left:2px solid var(--red);margin-bottom:8px;background:var(--bg3)}
+.yakin-item .y-tarih{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted)}
+.yakin-item .y-baslik{font-size:12px;color:var(--text);margin-top:3px}
+
+/* ---- KONSOL ---- */
+.konsol-wrap{display:grid;grid-template-columns:220px 1fr;gap:0;height:calc(100vh - 120px)}
+.konsol-sidebar{background:var(--bg2);border-right:0.5px solid var(--line);padding:12px;overflow-y:auto}
+.konsol-sidebar-head{font-family:'Space Mono',monospace;font-size:9px;color:var(--faint);letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px;padding-bottom:8px;border-bottom:0.5px solid var(--line)}
+.konsol-cmd{padding:8px 10px;font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);cursor:pointer;border-left:2px solid transparent;transition:all .15s;border-bottom:0.5px solid var(--line)}
+.konsol-cmd:hover{color:var(--text);border-left-color:var(--red);background:var(--bg3)}
+.konsol-cmd .kc-onay{color:var(--amber);font-size:9px}
+.konsol-ekran{background:#050505;display:flex;flex-direction:column}
+.konsol-cikti{flex:1;padding:16px;font-family:'Space Mono',monospace;font-size:12px;color:#00ff41;overflow-y:auto;white-space:pre-wrap;line-height:1.6;min-height:0}
+.konsol-cikti .hata{color:#ff4444}
+.konsol-cikti .uyari{color:#ffaa00}
+.konsol-input-satir{display:flex;align-items:center;gap:8px;padding:10px 16px;border-top:0.5px solid #1a1a1a;background:#080808}
+.konsol-prompt{font-family:'Space Mono',monospace;font-size:12px;color:#c0392b;white-space:nowrap}
+.konsol-input{flex:1;background:none;border:none;outline:none;font-family:'Space Mono',monospace;font-size:12px;color:#00ff41;caret-color:#c0392b}
+.konsol-gonder{font-family:'Space Mono',monospace;font-size:10px;padding:6px 14px;background:var(--red);color:#fff;border:none;cursor:pointer;letter-spacing:.08em}
+.konsol-mod-bar{padding:8px 16px;background:#080808;border-bottom:0.5px solid #1a1a1a;display:flex;align-items:center;gap:12px;flex-shrink:0}
+.konsol-mod-btn{font-family:'Space Mono',monospace;font-size:9px;padding:4px 12px;border:0.5px solid #2a2a2a;background:none;color:#555;cursor:pointer;letter-spacing:.08em;text-transform:uppercase;transition:all .2s}
+.konsol-mod-btn.aktif{border-color:var(--red);color:#00ff41;background:rgba(0,255,65,.05)}
+.konsol-tfa-satir{display:flex;gap:8px;padding:6px 16px;background:#080808;border-top:0.5px solid #1a1a1a}
+.konsol-tfa-input{background:#0a0a0a;border:0.5px solid #c0392b;color:#00ff41;padding:5px 10px;font-family:'Space Mono',monospace;font-size:12px;width:120px;outline:none;letter-spacing:.2em}
+</style>
+
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">RED<span>CELL</span> AR-GE</div>
+    <h2>Admin Girisi</h2>
+    <p>Yonetim paneline erisim icin giris yapin.</p>
+    <div class="field"><label>Kullanici Adi</label><input type="text" id="l-user" placeholder="admin" onkeydown="if(event.key==='Enter')girisYap()"/></div>
+    <div class="field"><label>Sifre</label><input type="password" id="l-pass" placeholder="redcell2025" onkeydown="if(event.key==='Enter')girisYap()"/></div>
+    <button class="login-btn" onclick="girisYap()">Giris Yap</button>
+    <p class="login-hint">Demo: admin / redcell2025</p>
+  </div>
+</div>
+
+<div id="app">
+  <div class="topbar">
+    <div class="top-logo">RED<span>CELL</span> AR-GE</div>
+    <div class="top-r">
+      <span id="top-page" style="font-size:13px;color:var(--muted)">Dashboard</span>
+      <button class="tbtn" onclick="cikisYap()">Cikis</button>
+    </div>
+  </div>
+
+      <!-- WIDGET TOGGLE BAR -->
+      <div class="widget-toggle-bar" id="widget-toggle-bar">
+        <span>Widgetlar:</span>
+        <button class="wtoggle aktif" onclick="widgetToggle('cpu')" id="wt-cpu">CPU</button>
+        <button class="wtoggle aktif" onclick="widgetToggle('bellek')" id="wt-bellek">Bellek</button>
+        <button class="wtoggle aktif" onclick="widgetToggle('disk')" id="wt-disk">Disk</button>
+        <button class="wtoggle aktif" onclick="widgetToggle('sicaklik')" id="wt-sicaklik">Sıcaklık</button>
+        <button class="wtoggle aktif" onclick="widgetToggle('projeler')" id="wt-projeler">Projeler</button>
+        <button class="wtoggle aktif" onclick="widgetToggle('ekip')" id="wt-ekip">Ekip</button>
+        <button class="wtoggle aktif" onclick="widgetToggle('ajanlar')" id="wt-ajanlar">Ajanlar</button>
+        <button class="wtoggle aktif" onclick="widgetToggle('gelir')" id="wt-gelir">Gelir</button>
+      </div>
+
+      <!-- WIDGET BAR -->
+      <div class="widget-bar" id="widget-bar">
+        <div class="widget-item" id="w-cpu">
+          <div class="widget-label">CPU</div>
+          <div class="widget-val" id="w-cpu-val">—</div>
+          <div class="widget-sub" id="w-cpu-sub">yükleniyor</div>
+        </div>
+        <div class="widget-item" id="w-bellek">
+          <div class="widget-label">Bellek</div>
+          <div class="widget-val" id="w-bellek-val">—</div>
+          <div class="widget-sub" id="w-bellek-sub">yükleniyor</div>
+        </div>
+        <div class="widget-item" id="w-disk">
+          <div class="widget-label">Disk</div>
+          <div class="widget-val" id="w-disk-val">—</div>
+          <div class="widget-sub" id="w-disk-sub">yükleniyor</div>
+        </div>
+        <div class="widget-item" id="w-sicaklik">
+          <div class="widget-label">Sıcaklık</div>
+          <div class="widget-val" id="w-sicaklik-val">—</div>
+          <div class="widget-sub" id="w-sicaklik-sub">yükleniyor</div>
+        </div>
+        <div class="widget-item" id="w-projeler">
+          <div class="widget-label">Aktif Proje</div>
+          <div class="widget-val" id="w-projeler-val">—</div>
+          <div class="widget-sub" id="w-projeler-sub">bekleyen / devam</div>
+        </div>
+        <div class="widget-item" id="w-ekip">
+          <div class="widget-label">Ekip</div>
+          <div class="widget-val" id="w-ekip-val">—</div>
+          <div class="widget-sub" id="w-ekip-sub">aktif / müsait</div>
+        </div>
+        <div class="widget-item" id="w-ajanlar">
+          <div class="widget-label">Ajan Sistemi</div>
+          <div class="widget-val" id="w-ajanlar-val">—</div>
+          <div class="widget-sub" id="w-ajanlar-sub">durum</div>
+        </div>
+        <div class="widget-item" id="w-gelir">
+          <div class="widget-label">Bu Ay Gelir</div>
+          <div class="widget-val" id="w-gelir-val">—</div>
+          <div class="widget-sub">son 30 gün</div>
+        </div>
+      </div>
+
+  <div class="layout">
+    <div class="sidebar">
+      <nav class="sidebar-nav">
+        <div class="nav-sec">Genel</div>
+        <a class="nitem active" onclick="goPage('dashboard')"><i class="ti ti-dashboard"></i>Dashboard</a>
+        <a class="nitem" onclick="goPage('bildirimler')"><i class="ti ti-bell"></i>Bildirimler<span class="nbadge" id="sb-bil" style="display:none">0</span></a>
+        <a class="nitem" onclick="goPage('talepler')"><i class="ti ti-clipboard-list"></i>Talepler<span class="nbadge" id="sb-tal" style="display:none">0</span></a>
+        <a class="nitem" onclick="goPage('raporlar')"><i class="ti ti-file-analytics"></i>Raporlar</a>
+        <div class="nav-sec">Yonetim</div>
+        <a class="nitem" onclick="goPage('ekip')"><i class="ti ti-users"></i>Ekip</a>
+        <a class="nitem" onclick="goPage('takvim')"><i class="ti ti-calendar"></i>Takvim</a>
+        <a class="nitem" onclick="goPage('konsol')"><i class="ti ti-terminal-2"></i>Konsol</a>
+        <a class="nitem" onclick="goPage('ayarlar')"><i class="ti ti-settings"></i>Ayarlar</a>
+        <div class="nav-sec">Baglantilar</div>
+        <a class="nitem" href="portal.html" target="_blank"><i class="ti ti-user-circle"></i>Musteri Portali</a>
+        <a class="nitem" href="ekip-panel.html" target="_blank"><i class="ti ti-id-badge"></i>Ekip Paneli</a>
+        <a class="nitem" href="rapor-motoru.html" target="_blank"><i class="ti ti-sparkles"></i>Rapor Motoru</a>
+        <a class="nitem" href="index.html" target="_blank"><i class="ti ti-world"></i>Ana Site</a>
+      </nav>
+      <div class="sidebar-foot">REDCELL Admin</div>
+    </div>
+    <div class="main">
+
+      <div class="page active" id="page-dashboard">
+        <div class="stat-grid">
+          <div class="stat-card" onclick="goPage('talepler')"><div class="sc-label">Toplam Talep</div><div class="sc-val" id="s-total">0</div><div class="sc-sub">Tum zamanlar</div></div>
+          <div class="stat-card" onclick="goPage('talepler')"><div class="sc-label">Bekleyen</div><div class="sc-val c-amber" id="s-bekleyen">0</div><div class="sc-sub">Inceleme bekliyor</div></div>
+          <div class="stat-card" onclick="goPage('talepler')"><div class="sc-label">Devam Eden</div><div class="sc-val c-blue" id="s-devam">0</div><div class="sc-sub">Aktif proje</div></div>
+          <div class="stat-card" onclick="goPage('raporlar')"><div class="sc-label">Tamamlanan</div><div class="sc-val c-green" id="s-tamam">0</div><div class="sc-sub">Rapor hazirlandi</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 300px;gap:1px;background:var(--line);margin-bottom:24px">
+          <div style="background:var(--bg);padding:20px">
+            <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--faint);letter-spacing:.12em;text-transform:uppercase;margin-bottom:14px">Hizmet Dagilimi</div>
+            <div id="hizmet-grafik"><div class="empty" style="padding:20px"><i class="ti ti-chart-bar"></i>Talep yok</div></div>
+          </div>
+          <div style="background:var(--bg);border-left:0.5px solid var(--line)">
+            <div style="padding:12px 16px;border-bottom:0.5px solid var(--line);display:flex;justify-content:space-between;align-items:center">
+              <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--faint);letter-spacing:.12em;text-transform:uppercase">Canli Akis</span>
+              <button class="abtn" onclick="goPage('bildirimler')">Tumu</button>
+            </div>
+            <div id="dash-bil-mini"></div>
+          </div>
+        </div>
+        <div class="tbl-wrap" style="margin-bottom:24px">
+          <div class="tbl-head-row"><h3>Bekleyen Talepler</h3><button class="abtn go" onclick="goPage('talepler')">Tumu</button></div>
+          <div id="bekleyen-liste"></div>
+        </div>
+        <div class="tbl-wrap" style="margin-bottom:24px">
+          <div class="tbl-head-row"><h3>Hizli Rapor Uret</h3><a href="rapor-motoru.html" target="_blank" class="abtn">Tam Ekran</a></div>
+          <div style="padding:18px">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">
+              <div class="field"><label>Talep Sec</label><select id="hizli-talep" onchange="hizliTalepSec(this.value)"><option value="">Manuel gir</option></select></div>
+              <div class="field"><label>Musteri</label><input type="text" id="hizli-musteri" placeholder="Firma A.S."/></div>
+              <div class="field"><label>Hizmet</label><select id="hizli-hizmet"><option>Web Uygulama Guvenligi</option><option>Ag Sizma Testi</option><option>Mobil Uygulama Analizi</option><option>Red Team Operasyonu</option><option>IoT Donanim Guvenligi</option><option>Sosyal Muhendislik</option></select></div>
+            </div>
+            <div class="field" style="margin-bottom:12px"><label>Bulgular / Arac Ciktisi</label><textarea id="hizli-bulgular" style="background:var(--bg2);border:0.5px solid var(--line2);color:var(--text);padding:10px;font-family:'Space Mono',monospace;font-size:12px;width:100%;min-height:80px;outline:none;resize:vertical" placeholder="Nmap, Burp, Nikto ciktisi veya manual bulgular..."></textarea></div>
+            <div style="display:flex;gap:10px;align-items:center">
+              <button onclick="hizliRaporUret()" id="hizli-btn" style="font-family:'Space Mono',monospace;font-size:11px;padding:11px 22px;background:var(--red);color:#fff;border:none;cursor:pointer;letter-spacing:.1em;text-transform:uppercase">Rapor Uret</button>
+              <span id="hizli-durum" style="font-size:12px;color:var(--muted)"></span>
+            </div>
+            <div id="hizli-cikti"></div>
+          </div>
+        </div>
+        <div class="tbl-wrap">
+          <div class="tbl-head-row"><h3>Son Raporlar</h3><button class="abtn" onclick="goPage('raporlar')">Tumu</button></div>
+          <table><thead><tr><th>#</th><th>Musteri</th><th>Hizmet</th><th>Tarih</th><th>Islem</th></tr></thead><tbody id="son-raporlar"></tbody></table>
+        </div>
+      </div>
+
+      <div class="page" id="page-bildirimler">
+        <div class="page-head"><h1>Bildirimler</h1><button class="sec-btn" onclick="RC.tumunuOku();renderAll();toast('Tumu okundu')">Tumunu Okundu</button></div>
+        <div id="bil-liste"></div>
+      </div>
+
+      <div class="page" id="page-talepler">
+        <div class="page-head"><h1>Tum Talepler</h1><button class="sec-btn primary" onclick="openModal('modal-talep-ekle')">+ Manuel Ekle</button></div>
+        <div class="tbl-wrap">
+          <table><thead><tr><th>#</th><th>Musteri</th><th>E-posta</th><th>Hizmet</th><th>Tarih</th><th>Durum</th><th>Islem</th></tr></thead><tbody id="talepler-tbl"></tbody></table>
+        </div>
+      </div>
+
+      <div class="page" id="page-raporlar">
+        <div class="page-head"><h1>Raporlar</h1></div>
+        <div class="tbl-wrap">
+          <table><thead><tr><th>#</th><th>Musteri</th><th>Hizmet</th><th>Tarih</th><th>Islem</th></tr></thead><tbody id="raporlar-tbl"></tbody></table>
+        </div>
+      </div>
+
+      <div class="page" id="page-ekip">
+        <div class="page-head"><h1>Ekip Uyeleri</h1><button class="sec-btn primary" onclick="openModal('modal-uye-ekle')">+ Uye Ekle</button></div>
+        <div class="ekip-grid" id="ekip-grid"></div>
+      </div>
+
+
+      <!-- TAKVİM SAYFASI -->
+      <div class="page" id="page-takvim">
+        <div class="page-head">
+          <h1>Takvim</h1>
+          <button class="sec-btn primary" onclick="etkinlikEkleModal()">+ Etkinlik Ekle</button>
+        </div>
+        <div class="takvim-wrap">
+          <div class="takvim-grid">
+            <div class="takvim-header">
+              <div class="takvim-nav">
+                <button onclick="takvimOncekiAy()"><i class="ti ti-chevron-left"></i></button>
+                <span class="takvim-ay-adi" id="takvim-ay-adi"></span>
+                <button onclick="takvimSonrakiAy()"><i class="ti ti-chevron-right"></i></button>
+              </div>
+              <button class="sec-btn" onclick="takvimBuAy()">Bu Ay</button>
+            </div>
+            <div class="takvim-haftalar">
+              <div class="takvim-gun-adi">Pzt</div>
+              <div class="takvim-gun-adi">Sal</div>
+              <div class="takvim-gun-adi">Çar</div>
+              <div class="takvim-gun-adi">Per</div>
+              <div class="takvim-gun-adi">Cum</div>
+              <div class="takvim-gun-adi">Cmt</div>
+              <div class="takvim-gun-adi">Paz</div>
+            </div>
+            <div id="takvim-gunler" class="takvim-haftalar" style="margin-top:1px"></div>
+          </div>
+          <div class="takvim-yan">
+            <div class="takvim-yan-head">
+              <span>Yaklaşan Etkinlikler</span>
+              <span id="yakin-sayi" style="color:var(--red)"></span>
+            </div>
+            <div class="takvim-yakin" id="yakin-etkinlikler"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KONSOL SAYFASI -->
+      <div class="page" id="page-konsol">
+        <div class="konsol-wrap">
+          <div class="konsol-sidebar">
+            <div class="konsol-sidebar-head">Hazır Komutlar</div>
+            <div id="konsol-whitelist"></div>
+            <div style="margin-top:16px;padding:8px;background:var(--bg3);border:0.5px solid var(--line2)">
+              <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--faint);margin-bottom:6px">SERBEST MOD</div>
+              <div style="font-size:11px;color:var(--muted);line-height:1.5">2FA aktif olduğunda serbest komut çalıştırabilirsiniz.</div>
+              <div id="konsol-tfa-badge" style="margin-top:8px;font-family:'Space Mono',monospace;font-size:10px;color:var(--muted)">2FA: —</div>
+            </div>
+          </div>
+          <div class="konsol-ekran">
+            <div class="konsol-mod-bar">
+              <button class="konsol-mod-btn aktif" id="kmod-whitelist" onclick="konsolMod('whitelist')">Whitelist</button>
+              <button class="konsol-mod-btn" id="kmod-serbest" onclick="konsolMod('serbest')">Serbest (2FA)</button>
+              <span style="margin-left:auto;font-family:'Space Mono',monospace;font-size:9px;color:var(--faint)" id="konsol-durum-yazisi">Hazır</span>
+            </div>
+            <div class="konsol-cikti" id="konsol-cikti">REDCELL Admin Konsol v1.0
+════════════════════════════════════
+Kullanılabilir komutları görmek için /help yazın.
+Serbest mod için 2FA aktif olması gerekir.
+
+</div>
+            <div class="konsol-tfa-satir" id="konsol-tfa-satir" style="display:none">
+              <input class="konsol-tfa-input" type="text" id="konsol-tfa-input" placeholder="2FA Kodu" maxlength="6"/>
+              <button class="konsol-gonder" onclick="konsolTfaOnayla()">Onayla</button>
+              <button class="konsol-mod-btn" onclick="document.getElementById('konsol-tfa-satir').style.display='none'">İptal</button>
+            </div>
+            <div id="konsol-onay-satir" style="display:none;padding:8px 16px;background:#1a0000;border-top:0.5px solid var(--red)">
+              <span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--amber)" id="konsol-onay-mesaj"></span>
+              <button class="konsol-gonder" style="margin-left:12px;background:var(--amber)" onclick="konsolOnaylaVeCalistir()">ONAYLA</button>
+              <button class="konsol-mod-btn" style="margin-left:6px" onclick="document.getElementById('konsol-onay-satir').style.display='none'">İptal</button>
+            </div>
+            <div class="konsol-input-satir">
+              <span class="konsol-prompt">admin@redcell:~$</span>
+              <input class="konsol-input" type="text" id="konsol-input" placeholder="komut girin..." onkeydown="konsolKeyDown(event)"/>
+              <button class="konsol-gonder" onclick="konsolGonder()">↵</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="page" id="page-ayarlar">
+        <div class="page-head"><h1>Ayarlar</h1></div>
+        <div class="ayar-blok">
+          <div class="ayar-blok-head">Admin Sifresi</div>
+          <div class="ayar-row">Yeni Sifre
+            <div style="display:flex;gap:8px">
+              <input type="password" id="new-pass" style="background:var(--bg3);border:0.5px solid var(--line2);color:var(--text);padding:7px 12px;font-size:13px;width:200px;outline:none" placeholder="yeni sifre"/>
+              <button class="sec-btn primary" onclick="sifreDegistir()">Kaydet</button>
+            </div>
+          </div>
+        </div>
+        <div class="ayar-blok">
+          <div class="ayar-blok-head">Veri Yonetimi</div>
+          
+      <!-- 2FA Ayarı -->
+      <div class="ayar-row" style="flex-direction:column;align-items:flex-start;gap:12px">
+        <div style="display:flex;justify-content:space-between;width:100%;align-items:center">
+          <div>
+            <div style="font-size:13px;color:var(--text)">İki Faktörlü Doğrulama (2FA)</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px">Google Authenticator ile giriş güvenliği</div>
+          </div>
+          <span id="tfa-durum-badge" style="font-family:'Space Mono',monospace;font-size:10px;padding:4px 10px;background:var(--bg3);border:0.5px solid var(--line2);color:var(--muted)">YÜKLENİYOR</span>
+        </div>
+        <div id="tfa-panel" style="display:none;width:100%">
+          <img id="tfa-qr" src="" style="width:180px;height:180px;border:2px solid var(--line2);display:none"/>
+          <div class="field" style="margin-top:8px">
+            <label>Doğrulama Kodu</label>
+            <input type="text" id="tfa-kod" placeholder="6 haneli kod" maxlength="6" style="width:160px;letter-spacing:0.2em"/>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="sec-btn" id="tfa-btn-ac" onclick="tfaAktifles()" style="display:none">Aktif Et</button>
+          <button class="sec-btn" id="tfa-btn-dogrula" onclick="tfaDogrula()" style="display:none">Kodu Doğrula</button>
+          <button class="sec-btn" id="tfa-btn-kapat" onclick="tfaKapat()" style="display:none;border-color:var(--red);color:var(--red)">Kapat</button>
+        </div>
+      </div>
+      <div class="ayar-row">Demo veri yukle<button class="sec-btn" onclick="RC.demoyukle();renderAll();toast('Demo veriler yuklendi')">Yukle</button></div>
+          <div class="ayar-row">Tum verileri sifirla<button class="sec-btn" style="color:var(--red);border-color:var(--red)" onclick="verileriSifirla()">Sifirla</button></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Talep Detay -->
+<div class="modal-bg" id="modal-talep">
+  <div class="modal">
+    <div class="modal-head"><h3 id="mt-baslik">Talep Detayi</h3><button class="mx" onclick="closeModal('modal-talep')"><i class="ti ti-x"></i></button></div>
+    <div class="modal-body" id="mt-body"></div>
+    <div class="modal-foot">
+      <button class="sec-btn" onclick="closeModal('modal-talep')">Kapat</button>
+      <button class="sec-btn go" id="btn-basla" style="display:none" onclick="talepBasla()">Goreve Basla</button>
+      <button class="sec-btn" id="btn-ata" style="display:none" onclick="ataModalAc()">Uye Ata</button>
+      <button class="sec-btn primary" id="btn-rapor" onclick="raporUret()">AI Rapor Uret</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Rapor -->
+<div class="modal-bg" id="modal-rapor">
+  <div class="modal" style="width:700px;max-width:97vw">
+    <div class="modal-head"><h3 id="mr-baslik">Rapor</h3><button class="mx" onclick="closeModal('modal-rapor')"><i class="ti ti-x"></i></button></div>
+    <div class="modal-body" id="mr-body"></div>
+    <div class="modal-foot">
+      <button class="sec-btn" onclick="closeModal('modal-rapor')">Kapat</button>
+      <button class="sec-btn primary" onclick="pdfYazdir()">PDF Indir</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Atama -->
+<div class="modal-bg" id="modal-ata">
+  <div class="modal">
+    <div class="modal-head"><h3>Gorev Ata</h3><button class="mx" onclick="closeModal('modal-ata')"><i class="ti ti-x"></i></button></div>
+    <div class="modal-body" id="ata-body"></div>
+    <div class="modal-foot">
+      <button class="sec-btn" onclick="closeModal('modal-ata')">Iptal</button>
+      <button class="sec-btn primary" onclick="atamayiOnayla()">Ata</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Uye Ekle -->
+<div class="modal-bg" id="modal-uye-ekle">
+  <div class="modal">
+    <div class="modal-head"><h3>Ekip Uyesi Ekle</h3><button class="mx" onclick="closeModal('modal-uye-ekle')"><i class="ti ti-x"></i></button></div>
+    <div class="modal-body">
+      <div class="two-col">
+        <div class="field"><label>Ad Soyad</label><input id="ue-ad" type="text" placeholder="Ahmet Yilmaz"/></div>
+        <div class="field"><label>Rol</label><input id="ue-rol" type="text" placeholder="Penetration Tester"/></div>
+      </div>
+      <div class="field" style="margin-top:10px"><label>Sertifikalar (virgulle)</label><input id="ue-cert" type="text" placeholder="OSCP, CEH"/></div>
+      <div class="field" style="margin-top:10px"><label>Uzmanlik Alanlari (virgulle)</label><input id="ue-uzmanlik" type="text" placeholder="web, owasp, network"/></div>
+      <div class="two-col" style="margin-top:10px">
+        <div class="field"><label>Kullanici Adi</label><input id="ue-kullanici" type="text" placeholder="ahmet"/></div>
+        <div class="field"><label>Sifre</label><input id="ue-sifre" type="text" placeholder="sifre123"/></div>
+      </div>
+      <div class="field" style="margin-top:10px"><label>E-posta</label><input id="ue-eposta" type="email" placeholder="ahmet@redcell.com.tr"/></div>
+      <div class="field" style="margin-top:10px"><label>Durum</label>
+        <select id="ue-durum"><option value="available">Musait</option><option value="busy">Projede</option><option value="off">Izinde</option></select>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="sec-btn" onclick="closeModal('modal-uye-ekle')">Iptal</button>
+      <button class="sec-btn primary" onclick="uyeEkle()">Ekle</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Manuel Talep -->
+<div class="modal-bg" id="modal-talep-ekle">
+  <div class="modal">
+    <div class="modal-head"><h3>Manuel Talep Ekle</h3><button class="mx" onclick="closeModal('modal-talep-ekle')"><i class="ti ti-x"></i></button></div>
+    <div class="modal-body">
+      <div class="two-col">
+        <div class="field"><label>Musteri Adi</label><input id="nt-ad" type="text" placeholder="Firma A.S."/></div>
+        <div class="field"><label>E-posta</label><input id="nt-email" type="email" placeholder="firma@ornek.com"/></div>
+      </div>
+      <div class="field" style="margin-top:10px"><label>Hizmet</label>
+        <select id="nt-hizmet"><option>Web Uygulama Guvenligi</option><option>Ag Sizma Testi</option><option>Mobil Uygulama Analizi</option><option>Red Team Operasyonu</option><option>IoT Donanim Guvenligi</option><option>Sosyal Muhendislik</option></select>
+      </div>
+      <div class="field" style="margin-top:10px"><label>Proje Ozeti</label><textarea id="nt-ozet" placeholder="Kapsam ve gereksinimler..."></textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="sec-btn" onclick="closeModal('modal-talep-ekle')">Iptal</button>
+      <button class="sec-btn primary" onclick="yeniTalepEkle()">Ekle</button>
+    </div>
+  </div>
+</div>
+
+
+
+<script>
+var currentTalepId = null;
+var currentRaporId = null;
+
+async function girisYap(){
+  var u = document.getElementById('l-user').value.trim();
+  var p = document.getElementById('l-pass').value.trim();
+  var sonuc = await RC.girisYap(u, p, 'admin');
+  if(sonuc.ok){
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    RC.pushAbonelikBaslat().catch(function(){});
+    renderAll();
+    setInterval(renderAll, 8000);
+    widgetleriGuncelle();
+  } else {
+    alert('Kullanici adi veya sifre hatali!\nKullanici: admin\nSifre: redcell2025');
+  }
+}
+
+function cikisYap(){
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+}
+
+function goPage(name){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.nitem').forEach(function(n){n.classList.remove('active');});
+  document.getElementById('page-'+name).classList.add('active');
+  var titles = {dashboard:'Dashboard',bildirimler:'Bildirimler',talepler:'Talepler',raporlar:'Raporlar',ekip:'Ekip',takvim:'Takvim',konsol:'Konsol',ayarlar:'Ayarlar'};
+  document.getElementById('top-page').textContent = titles[name]||name;
+  var order = ['dashboard','bildirimler','talepler','raporlar','ekip','takvim','konsol','ayarlar'];
+  var items = document.querySelectorAll('.nitem');
+  if(items[order.indexOf(name)]) items[order.indexOf(name)].classList.add('active');
+  if(name==='bildirimler'){ RC.tumunuOku(); }
+  if(name==='ayarlar'){ tfaDurumYukle(); }
+  if(name==='takvim'){ takvimYukle(); }
+  if(name==='konsol'){ konsolSayfaAc(); }
+  renderAll();
+}
+
+function g(id){ return document.getElementById(id); }
+
+async function renderAll(){
+  var t = await RC.talepler(), r = await RC.raporlar(), b = await RC.bildirimler(), e = await RC.ekip();
+  var bekleyen = t.filter(function(x){return x.durum==='bekleyen';});
+  var devam = t.filter(function(x){return x.durum==='devam';});
+  var tamam = t.filter(function(x){return x.durum==='tamamlandi';});
+  var okunmamis = b.filter(function(x){return !x.okundu;}).length;
+
+  g('s-total').textContent = t.length;
+  g('s-bekleyen').textContent = bekleyen.length;
+  g('s-devam').textContent = devam.length;
+  g('s-tamam').textContent = tamam.length;
+
+  var sbBil = g('sb-bil');
+  var sbTal = g('sb-tal');
+  if(sbBil){ sbBil.textContent=okunmamis; sbBil.style.display=okunmamis>0?'inline':'none'; }
+  if(sbTal){ sbTal.textContent=bekleyen.length; sbTal.style.display=bekleyen.length>0?'inline':'none'; }
+
+  renderDashboard(t, b, bekleyen);
+
+  if(g('bil-liste')) g('bil-liste').innerHTML = renderBildirimler(b) || '<div class="empty"><i class="ti ti-bell-off"></i>Bildirim yok</div>';
+
+  if(g('talepler-tbl')){
+    g('talepler-tbl').innerHTML = t.slice().reverse().map(function(x){
+      return '<tr><td style="font-family:Space Mono,monospace;font-size:10px;color:var(--faint)">'+x.id+'</td>'+
+        '<td class="td-main">'+x.ad+'</td><td>'+( x.email||'-')+'</td><td>'+x.hizmet+'</td><td>'+x.tarih+'</td>'+
+        '<td>'+durumBadge(x.durum)+'</td>'+
+        '<td><button class="abtn go" onclick="openTalep(\''+x.id+'\')">Detay</button><button class="abtn" onclick="talepSil(\''+x.id+'\')">Sil</button></td></tr>';
+    }).join('') || '<tr><td colspan="7" class="empty">Talep yok</td></tr>';
+  }
+
+  if(g('raporlar-tbl')){
+    g('raporlar-tbl').innerHTML = r.slice().reverse().map(function(x){
+      return '<tr><td style="font-family:Space Mono,monospace;font-size:10px;color:var(--faint)">'+x.id+'</td>'+
+        '<td class="td-main">'+x.ad+'</td><td>'+x.hizmet+'</td><td>'+x.tarih+'</td>'+
+        '<td><button class="abtn go" onclick="openRapor(\''+x.id+'\')">Goruntule</button></td></tr>';
+    }).join('') || '<tr><td colspan="5" class="empty">Rapor yok</td></tr>';
+  }
+
+  if(g('ekip-grid')){
+    g('ekip-grid').innerHTML = e.map(function(u){
+      var aktif = await RC.gorevler().filter(function(gv){return gv.atananId===u.id&&gv.durum==='devam';}).length;
+      var durumR = u.durum==='available'?'var(--green)':u.durum==='busy'?'var(--amber)':'var(--faint)';
+      var durumL = u.durum==='available'?'Musait':u.durum==='busy'?'Projede':'Izinde';
+      return '<div class="ekip-kart">'+
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">'+
+          '<div class="ek-avatar">'+initials(u.ad)+'</div>'+
+          '<span style="font-family:Space Mono,monospace;font-size:10px;padding:3px 8px;border:0.5px solid '+durumR+';color:'+durumR+'">'+durumL+'</span>'+
+        '</div>'+
+        '<div class="ek-ad">'+u.ad+'</div><div class="ek-rol">'+u.rol+'</div>'+
+        '<div class="ek-certs">'+(u.cert||[]).map(function(c){return '<span class="ek-cert">'+c+'</span>';}).join('')+'</div>'+
+        '<div style="font-family:Space Mono,monospace;font-size:10px;color:var(--faint)">'+( u.kullanici?'Kullanici: '+u.kullanici:'')+'</div>'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:0.5px solid var(--line)">'+
+          '<span style="font-size:11px;color:var(--muted)">'+aktif+' aktif gorev</span>'+
+          '<button class="abtn" onclick="RC.uyeSil(\''+u.id+'\');renderAll()">Sil</button>'+
+        '</div></div>';
+    }).join('') || '<div class="empty" style="grid-column:1/-1"><i class="ti ti-users-off"></i>Ekip uyesi yok</div>';
+  }
+}
+
+function renderDashboard(t, b, bekleyen){
+  var hizmetSay = {};
+  t.forEach(function(x){ hizmetSay[x.hizmet]=(hizmetSay[x.hizmet]||0)+1; });
+  var max = 1;
+  Object.values(hizmetSay).forEach(function(v){if(v>max)max=v;});
+  var renk = {'Web Uygulama Guvenligi':'#c0392b','Ag Sizma Testi':'#2980b9','Mobil Uygulama Analizi':'#8e44ad','Red Team Operasyonu':'#e67e22','IoT Donanim Guvenligi':'#27ae60','Sosyal Muhendislik':'#16a085'};
+  var gEl = g('hizmet-grafik');
+  if(gEl){
+    var keys = Object.keys(hizmetSay);
+    gEl.innerHTML = keys.length ? keys.sort(function(a,b2){return hizmetSay[b2]-hizmetSay[a];}).map(function(h){
+      var n=hizmetSay[h], pct=Math.round((n/max)*100), ren=renk[h]||'#c0392b';
+      return '<div class="grafik-row"><div class="grafik-label">'+h+'</div><div class="grafik-bar-wrap"><div class="grafik-bar-fill" style="width:'+pct+'%;background:'+ren+'"></div></div><div class="grafik-sayi">'+n+'</div></div>';
+    }).join('') : '<div class="empty" style="padding:20px"><i class="ti ti-chart-bar"></i>Talep yok</div>';
+  }
+
+  var mini = g('dash-bil-mini');
+  if(mini){
+    var son = b.slice(0,5);
+    var iMap = {talep:'ti-clipboard-list',rapor:'ti-file-text',durum:'ti-refresh',sistem:'ti-settings'};
+    mini.innerHTML = son.length ? son.map(function(bx){
+      var ren = bx.tip==='rapor'?'green':bx.tip==='talep'?'amber':'blue';
+      var tid = (bx.meta&&bx.meta.talepId)||'', rid = (bx.meta&&bx.meta.raporId)||'';
+      return '<div style="display:flex;gap:9px;padding:10px 14px;border-bottom:0.5px solid var(--line);cursor:pointer" onclick="bildirimTikla(\''+bx.id+'\',\''+tid+'\',\''+rid+'\')">'+
+        '<i class="ti '+(iMap[bx.tip]||'ti-bell')+'" style="font-size:14px;color:var(--'+ren+');flex-shrink:0;margin-top:1px"></i>'+
+        '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:500;color:'+(bx.okundu?'var(--muted)':'var(--text)')+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+bx.baslik+'</div>'+
+        '<div style="font-size:11px;color:var(--faint);margin-top:1px">'+zamanFarki(bx.tarih)+'</div></div>'+
+        (!bx.okundu?'<span style="width:6px;height:6px;background:var(--red);border-radius:50%;flex-shrink:0;margin-top:4px;display:block"></span>':'')+
+      '</div>';
+    }).join('') : '<div style="padding:20px;text-align:center;color:var(--faint);font-size:12px">Bildirim yok</div>';
+  }
+
+  var blEl = g('bekleyen-liste');
+  if(blEl){
+    blEl.innerHTML = bekleyen.length ? bekleyen.map(function(x){
+      return '<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:0.5px solid var(--line)">'+
+        '<div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text)">'+x.ad+'</div>'+
+        '<div style="font-size:12px;color:var(--muted);margin-top:2px">'+x.hizmet+' - '+x.tarih+'</div></div>'+
+        '<button class="abtn go" onclick="openTalep(\''+x.id+'\')">Detay</button>'+
+        '<button class="abtn" onclick="hizliBaslat(\''+x.id+'\')" style="border-color:var(--blue);color:var(--blue)">Basla</button>'+
+      '</div>';
+    }).join('') : '<div style="padding:20px;text-align:center;color:var(--faint);font-size:12px">Bekleyen talep yok</div>';
+  }
+
+  var htEl = g('hizli-talep');
+  if(htEl){
+    var aktifT = t.filter(function(x){return x.durum!=='tamamlandi';});
+    htEl.innerHTML = '<option value="">Manuel gir</option>' + aktifT.map(function(x){return '<option value="'+x.id+'">'+x.id+' - '+x.ad+'</option>';}).join('');
+  }
+
+  var srEl = g('son-raporlar');
+  if(srEl){
+    var raporlar = await RC.raporlar();
+    srEl.innerHTML = raporlar.slice().reverse().slice(0,4).map(function(x){
+      return '<tr><td style="font-family:Space Mono,monospace;font-size:10px;color:var(--faint)">'+x.id+'</td>'+
+        '<td class="td-main">'+x.ad+'</td><td>'+x.hizmet+'</td><td>'+x.tarih+'</td>'+
+        '<td><button class="abtn go" onclick="openRapor(\''+x.id+'\')">Gor</button></td></tr>';
+    }).join('') || '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--faint);font-size:12px">Rapor yok</td></tr>';
+  }
+}
+
+function renderBildirimler(b){
+  var iMap = {talep:'ti-clipboard-list',rapor:'ti-file-text',durum:'ti-refresh',sistem:'ti-settings'};
+  return b.length ? '<div class="bil-liste">'+b.map(function(bx){
+    var tid=(bx.meta&&bx.meta.talepId)||'', rid=(bx.meta&&bx.meta.raporId)||'';
+    return '<div class="bil-item '+(bx.okundu?'':'okunmadi')+'" onclick="bildirimTikla(\''+bx.id+'\',\''+tid+'\',\''+rid+'\')">'+
+      '<div class="bil-icon '+bx.tip+'"><i class="ti '+(iMap[bx.tip]||'ti-bell')+'"></i></div>'+
+      '<div class="bil-info"><div class="bil-baslik">'+bx.baslik+'</div><div class="bil-mesaj">'+bx.mesaj+'</div><div class="bil-tarih">'+zamanFarki(bx.tarih)+'</div></div>'+
+      (!bx.okundu?'<div class="bil-dot"></div>':'')+
+    '</div>';
+  }).join('')+'</div>' : '';
+}
+
+function bildirimTikla(bilId, talepId, raporId){
+  RC.bildirimOku(bilId);
+  if(raporId) { openRapor(raporId); return; }
+  if(talepId) { openTalep(talepId); return; }
+  renderAll();
+}
+
+function openTalep(id){
+  currentTalepId = id;
+  var t = await RC.talepler().find(function(x){return x.id===id;});
+  if(!t) return;
+  var gorev = await RC.gorevler().find(function(gv){return gv.talepId===id;});
+  g('mt-baslik').textContent = 'Talep - '+t.id;
+  g('mt-body').innerHTML =
+    '<div style="margin-bottom:14px"><div style="font-family:Space Mono,monospace;font-size:10px;color:var(--faint);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">Musteri</div><div style="font-size:13px;color:var(--text)">'+t.ad+' - '+(t.email||'-')+'</div></div>'+
+    '<div style="margin-bottom:14px"><div style="font-family:Space Mono,monospace;font-size:10px;color:var(--faint);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">Hizmet</div><div style="font-size:13px;color:var(--text)">'+t.hizmet+'</div></div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">'+
+      '<div><div style="font-family:Space Mono,monospace;font-size:10px;color:var(--faint);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">Tarih</div><div style="font-size:13px;color:var(--text)">'+t.tarih+'</div></div>'+
+      '<div><div style="font-family:Space Mono,monospace;font-size:10px;color:var(--faint);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">Durum</div><div>'+durumBadge(t.durum)+'</div></div>'+
+    '</div>'+
+    (t.hedef?'<div style="margin-bottom:14px"><div style="font-family:Space Mono,monospace;font-size:10px;color:var(--faint);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">Hedef</div><div style="font-size:13px;color:var(--text)">'+t.hedef+'</div></div>':'')+
+    (gorev?'<div style="margin-bottom:14px;padding:12px;background:var(--bg3);border:0.5px solid rgba(39,174,96,.3)"><div style="font-size:11px;color:var(--green);font-family:Space Mono,monospace;margin-bottom:4px">ATANAN UZMAN</div><div style="font-size:13px;color:var(--text)">'+gorev.atananAd+'</div></div>':'')+
+    '<div style="height:0.5px;background:var(--line);margin:16px 0"></div>'+
+    '<div style="margin-bottom:14px"><div style="font-family:Space Mono,monospace;font-size:10px;color:var(--faint);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">Proje Ozeti</div><div style="font-size:13px;color:var(--text);line-height:1.7">'+(t.ozet||'-')+'</div></div>'+
+    '<div style="height:0.5px;background:var(--line);margin:16px 0"></div>'+
+    '<div class="field"><label>Test Bulgulari (AI Rapora Eklenecek)</label><textarea id="bulgular-modal" style="background:var(--bg);border:0.5px solid var(--line2);color:var(--text);padding:10px;font-family:Space Mono,monospace;font-size:12px;width:100%;min-height:90px;outline:none;resize:vertical" placeholder="Nmap, Burp, Nikto ciktisi veya manual bulgular...">'+(gorev?gorev.bulgular||'':'')+'</textarea></div>'+
+    '<div id="ai-alan"></div>';
+  g('btn-basla').style.display = t.durum==='bekleyen'?'flex':'none';
+  g('btn-ata').style.display = t.durum!=='tamamlandi'?'flex':'none';
+  openModal('modal-talep');
+}
+
+function talepBasla(){
+  RC.talepDurumGuncelle(currentTalepId,'devam');
+  g('btn-basla').style.display='none';
+  renderAll();
+  toast('Test baslatildi');
+}
+
+function talepSil(id){
+  if(!confirm('Bu talebi silmek istiyor musunuz?')) return;
+  RC.talepSil(id);
+  renderAll();
+  toast('Talep silindi');
+}
+
+function ataModalAc(){
+  var t = await RC.talepler().find(function(x){return x.id===currentTalepId;});
+  if(!t) return;
+  var mevcut = await RC.gorevler().find(function(gv){return gv.talepId===t.id;});
+  var opts = await RC.ekip().map(function(u){
+    var dl = u.durum==='available'?'Musait':u.durum==='busy'?'Projede':'Izinde';
+    var sel = (mevcut&&mevcut.atananId===u.id)?'selected':'';
+    return '<option value="'+u.id+'" '+sel+'>'+u.ad+' ('+u.rol+') - '+dl+'</option>';
+  }).join('');
+  g('ata-body').innerHTML =
+    '<div style="font-size:13px;color:var(--muted);margin-bottom:14px">'+t.hizmet+' gorevi icin uzman secin:</div>'+
+    '<div class="field"><label>Ekip Uyesi</label><select id="ata-uye" style="background:var(--bg2);border:0.5px solid var(--line2);color:var(--text);padding:10px 12px;font-size:14px;outline:none;width:100%">'+opts+'</select></div>'+
+    (mevcut?'<div style="font-size:12px;color:var(--amber);margin-top:8px;padding:8px;background:rgba(230,126,34,.08);border:0.5px solid rgba(230,126,34,.2)">Mevcut atama: '+mevcut.atananAd+' - degistirmek icin yeni uye secin</div>':'');
+  openModal('modal-ata');
+}
+
+function atamayiOnayla(){
+  var uyeId = g('ata-uye')?g('ata-uye').value:'';
+  if(!uyeId){alert('Uye secin.');return;}
+  RC.manuelAta(currentTalepId, uyeId);
+  closeModal('modal-ata');
+  renderAll();
+  var uye = await RC.ekip().find(function(u){return u.id===uyeId;});
+  toast('Atama yapildi: '+(uye?uye.ad:''));
+}
+
+async function raporUret(){
+  var t = await RC.talepler().find(function(x){return x.id===currentTalepId;});
+  if(!t) return;
+  var bulgular = g('bulgular-modal')?g('bulgular-modal').value:'';
+  var alan = g('ai-alan');
+  g('btn-rapor').disabled = true;
+  alan.innerHTML = '<div class="ai-box"><div class="ai-head"><span class="aidot"></span><span class="aidot"></span><span class="aidot"></span> Claude analiz ediyor...</div></div>';
+
+  var prompt = 'Sen k\u0131demli bir siber g\u00FCvenlik uzman\u0131s\u0131n. Asagidaki bilgilere gore kapsaml\u0131 bir T\u00FCrk\u00E7e s\u0131zma testi raporu yaz.\n\nMUSTERI: '+t.ad+'\nHIZMET: '+t.hizmet+'\nHEDEF: '+(t.hedef||'-')+'\nOZET: '+(t.ozet||'')+'\nBULGULAR:\n'+(bulgular||'Genel guvenlik degerlendirmesi')+'\n\nBolumler:\n1. YONETICI OZETI\n2. KAPSAM VE METODOLOJI\n3. TESPIT EDILEN ZAFIYETLER (Risk + CVSS skoru)\n4. DETAYLI BULGULAR\n5. GENEL DEGERLENDIRME\n6. ONCELIKLI DUZELTME ADIMLARI';
+
+  try{
+    var res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,messages:[{role:'user',content:prompt}]})
+    });
+    var data = await res.json();
+    var text = data.content ? data.content.map(function(c){return c.text||'';}).join('') : 'Rapor uretilemedi.';
+    alan.innerHTML = '<div class="ai-box"><div class="ai-head"><i class="ti ti-check" style="font-size:13px"></i> Rapor Hazir</div><div class="ai-out">'+text+'</div>'+
+      '<div style="display:flex;gap:8px;margin-top:12px">'+
+        '<button onclick="raporKaydetVeKapat(\''+currentTalepId+'\')" class="sec-btn primary">Onayla & Kaydet</button>'+
+      '</div></div>';
+    sessionStorage.setItem('gecici_rapor', text);
+    toast('Rapor hazirland\u0131');
+  }catch(e){
+    alan.innerHTML = '<div class="ai-box"><div class="ai-out" style="color:var(--red)">Hata: '+e.message+'</div></div>';
+  }
+  g('btn-rapor').disabled = false;
+}
+
+function raporKaydetVeKapat(talepId){
+  var icerik = sessionStorage.getItem('gecici_rapor')||'';
+  if(!icerik){alert('Rapor bulunamadi.');return;}
+  var rapor = RC.raporKaydet(talepId, icerik, 'text');
+  sessionStorage.removeItem('gecici_rapor');
+  closeModal('modal-talep');
+  renderAll();
+  toast('Rapor kaydedildi - '+rapor.id);
+}
+
+async function hizliRaporUret(){
+  var musteri = g('hizli-musteri').value.trim();
+  var hizmet = g('hizli-hizmet').value;
+  var bulgular = g('hizli-bulgular').value.trim();
+  var talepId = g('hizli-talep').value;
+  if(!musteri){alert('Musteri adi zorunlu.');return;}
+  var btn = g('hizli-btn'), dur = g('hizli-durum'), out = g('hizli-cikti');
+  btn.disabled=true; dur.textContent='Analiz ediliyor...'; out.innerHTML='';
+  var prompt = 'Sen sizma testi uzman\u0131s\u0131n. Kisa ve profesyonel T\u00FCrk\u00E7e g\u00FCvenlik raporu yaz.\n\nMUSTERI: '+musteri+'\nHIZMET: '+hizmet+'\nBULGULAR:\n'+(bulgular||'Genel degerlendirme')+'\n\nBolumler: 1-Yonetici Ozeti 2-Zafiyetler (Risk+CVSS) 3-Detaylar 4-Oncelikli Adimlar';
+  try{
+    var res = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    var data = await res.json();
+    var text = data.content?data.content.map(function(c){return c.text||'';}).join(''):'Rapor uretilemedi.';
+    out.innerHTML='<div style="margin-top:14px;background:var(--bg3);border:0.5px solid var(--line2);padding:14px">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'+
+        '<span style="font-family:Space Mono,monospace;font-size:10px;color:var(--green)">RAPOR HAZIR</span>'+
+        '<button onclick="hizliPdf()" style="font-family:Space Mono,monospace;font-size:10px;padding:4px 10px;border:0.5px solid var(--green);color:var(--green);background:none;cursor:pointer">PDF Indir</button>'+
+      '</div><div id="hizli-rapor-text" style="font-size:12px;color:var(--muted);line-height:1.8;white-space:pre-wrap;max-height:280px;overflow-y:auto">'+text+'</div></div>';
+    if(talepId){ RC.raporKaydet(talepId,text,'text'); }
+    else{ var rl=await RC.raporlar(); rl.push({id:'R'+String(rl.length+1).padStart(3,'0'),talepId:'',ad:musteri,hizmet:hizmet,tarih:new Date().toISOString().slice(0,10),icerik:text,tip:'text'}); RC.save('raporlar',rl); }
+    dur.textContent='Kaydedildi.'; renderAll(); toast('Rapor uretildi');
+  }catch(e){ dur.textContent='Hata: '+e.message; }
+  btn.disabled=false;
+}
+
+function hizliTalepSec(id){
+  if(!id) return;
+  var t = await RC.talepler().find(function(x){return x.id===id;});
+  if(!t) return;
+  g('hizli-musteri').value = t.ad;
+}
+
+function hizliBaslat(id){
+  RC.talepDurumGuncelle(id,'devam');
+  renderAll();
+  toast('Test baslatildi');
+}
+
+function hizliPdf(){
+  var el = g('hizli-rapor-text');
+  if(!el) return;
+  var m = g('hizli-musteri').value||'Rapor';
+  var win = window.open('','_blank');
+  win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>REDCELL '+m+'</title><style>body{font-family:monospace;padding:48px;max-width:860px;margin:0 auto;font-size:12px;line-height:1.8}@media print{body{padding:24px}}</style></head><body><h1>REDCELL AR-GE - '+m+'</h1><hr/><pre style="white-space:pre-wrap">'+el.textContent+'</pre></body></html>');
+  win.document.close();
+  setTimeout(function(){win.print();},400);
+}
+
+function openRapor(id){
+  currentRaporId = id;
+  var r = await RC.raporlar().find(function(x){return x.id===id;});
+  if(!r) return;
+  g('mr-baslik').textContent = 'Rapor '+r.id+' - '+r.ad;
+  g('mr-body').innerHTML = '<div class="ai-box"><div class="ai-head"><i class="ti ti-file-text" style="font-size:13px"></i> '+r.hizmet+' - '+r.tarih+'</div><div class="ai-out" id="pdf-icerik">'+r.icerik+'</div></div>';
+  openModal('modal-rapor');
+}
+
+function pdfYazdir(){
+  var r = await RC.raporlar().find(function(x){return x.id===currentRaporId;});
+  if(!r) return;
+  var win = window.open('','_blank');
+  win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>REDCELL '+r.ad+'</title><style>body{font-family:monospace;padding:48px;max-width:860px;margin:0 auto;font-size:12px;line-height:1.8}.kirmizi{color:#c0392b}@media print{body{padding:24px}}</style></head><body>'+
+    '<p class="kirmizi" style="font-size:10px;letter-spacing:.2em;text-transform:uppercase">GIZLI - GUVENLIK DEGERLENDIRME RAPORU</p>'+
+    '<h1>'+r.ad+'</h1><p style="color:#888;font-size:11px">'+r.hizmet+' - '+r.tarih+' - REDCELL AR-GE</p><hr/>'+
+    '<pre style="white-space:pre-wrap">'+r.icerik+'</pre>'+
+    '<hr/><p style="color:#aaa;font-size:10px;text-align:center">REDCELL AR-GE - Gizlilik Sozlesmesi Kapsamindadir</p>'+
+    '</body></html>');
+  win.document.close();
+  setTimeout(function(){win.print();},400);
+}
+
+function uyeEkle(){
+  var ad=g('ue-ad').value.trim(), rol=g('ue-rol').value.trim();
+  if(!ad||!rol){alert('Ad ve rol zorunlu.');return;}
+  RC.uyeEkle({
+    ad:ad, rol:rol,
+    cert:g('ue-cert').value.split(',').map(function(s){return s.trim();}).filter(Boolean),
+    uzmanlik:g('ue-uzmanlik').value.split(',').map(function(s){return s.trim().toLowerCase();}).filter(Boolean),
+    kullanici:g('ue-kullanici').value.trim()||ad.split(' ')[0].toLowerCase(),
+    sifre:g('ue-sifre').value.trim()||'redcell2025',
+    eposta:g('ue-eposta').value.trim(),
+    durum:g('ue-durum').value
+  });
+  closeModal('modal-uye-ekle');
+  renderAll();
+  toast('Uye eklendi: '+ad);
+  ['ue-ad','ue-rol','ue-cert','ue-uzmanlik','ue-kullanici','ue-sifre','ue-eposta'].forEach(function(id){var el=g(id);if(el)el.value='';});
+}
+
+function yeniTalepEkle(){
+  var ad=g('nt-ad').value.trim(), email=g('nt-email').value.trim();
+  if(!ad||!email){alert('Ad ve e-posta zorunlu.');return;}
+  var talep = RC.talepEkle({ad:ad,email:email,hizmet:g('nt-hizmet').value,ozet:g('nt-ozet').value});
+  closeModal('modal-talep-ekle');
+  renderAll();
+  toast('Talep olusturuldu - '+talep.id);
+}
+
+function sifreDegistir(){
+  var np = g('new-pass').value;
+  if(!np){alert('Sifre bos olamaz.');return;}
+  RC.sifreDegistir(np);
+  toast('Sifre guncellendi');
+}
+
+function verileriSifirla(){
+  if(!confirm('Tum veriler silinecek. Emin misiniz?')) return;
+  ['rc_talepler','rc_raporlar','rc_ekip','rc_bildirimler','rc_gorevler'].forEach(function(k){localStorage.removeItem(k);});
+  renderAll();
+  toast('Veriler sifirland\u0131');
+}
+
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-bg').forEach(function(m){
+  m.addEventListener('click', function(e){ if(e.target===m) m.classList.remove('open'); });
+});
+
+function durumBadge(d){
+  var m = {bekleyen:'<span class="badge b-amber">Bekleyen</span>',devam:'<span class="badge b-blue">Devam</span>',tamamlandi:'<span class="badge b-green">Tamamlandi</span>'};
+  return m[d]||'<span class="badge b-gray">'+d+'</span>';
+}
+
+function initials(ad){ return (ad||'').split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase(); }
+
+function zamanFarki(iso){
+  var diff = Date.now()-new Date(iso).getTime();
+  var dk=Math.floor(diff/60000), sa=Math.floor(dk/60), gun=Math.floor(sa/24);
+  if(dk<1) return 'Az once';
+  if(dk<60) return dk+' dk once';
+  if(sa<24) return sa+' sa once';
+  return gun+' gun once';
+}
+
+function toast(msg, renk){
+  renk = renk||'var(--green)';
+  var t = document.createElement('div');
+  t.className = 'toast';
+  t.style.cssText = 'background:var(--bg2);border:0.5px solid '+renk+';color:'+renk;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(function(){t.remove();}, 3000);
+}
+</script>
+</body>
+</html>

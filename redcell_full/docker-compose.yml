@@ -1,0 +1,153 @@
+version: "3.9"
+
+# ============================================================
+# REDCELL AR-GE — Tam Platform
+# Kullanım: docker compose up --build
+# Site: http://localhost
+# Admin: http://localhost/admin
+# Müşteri Portalı: http://localhost/portal
+# Ekip Paneli: http://localhost/ekip
+# ============================================================
+
+services:
+
+  # ----------------------------------------------------------
+  # PostgreSQL
+  # ----------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: redcell_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:       ${DB_NAME:-redcell}
+      POSTGRES_USER:     ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-redcell}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ----------------------------------------------------------
+  # ChromaDB (Vektör DB - Ajan Sistemi için)
+  # ----------------------------------------------------------
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: redcell_chromadb
+    restart: unless-stopped
+    volumes:
+      - chroma_data:/chroma/chroma
+    ports:
+      - "8001:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/heartbeat"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  # ----------------------------------------------------------
+  # Redis (Mesaj Kuyruğu)
+  # ----------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: redcell_redis
+    restart: unless-stopped
+    command: redis-server --requirepass ${REDIS_PASSWORD:-changeme}
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-changeme}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ----------------------------------------------------------
+  # REDCELL Web + API (FastAPI)
+  # Site ve API aynı servisten geliyor → URL'de .html yok
+  # ----------------------------------------------------------
+  web:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.web
+    container_name: redcell_web
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL:      postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-changeme}@postgres:5432/${DB_NAME:-redcell}
+      SECRET_KEY:        ${SECRET_KEY:-gizli-anahtar-degistir}
+      JWT_EXPIRE_H:      ${JWT_EXPIRE_H:-24}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+      VAPID_PUBLIC_KEY:  ${VAPID_PUBLIC_KEY:-}
+      VAPID_EMAIL:       ${VAPID_EMAIL:-mailto:admin@redcell.com.tr}
+    ports:
+      - "80:8000"
+    volumes:
+      - ./frontend:/app/frontend:ro
+      - contracts_vol:/app/contracts
+    networks:
+      - redcell_net
+
+  # ----------------------------------------------------------
+  # REDCELL Ajan Sistemi (LangGraph)
+  # ----------------------------------------------------------
+  agents:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.agents
+    container_name: redcell_agents
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      web:
+        condition: service_started
+    environment:
+      # LLM
+      OPENAI_API_KEY:    ${OPENAI_API_KEY}
+      LLM_MODEL:         ${LLM_MODEL:-gpt-4o-mini}
+      MAX_RETRY_COUNT:   ${MAX_RETRY_COUNT:-3}
+      # Veritabanı
+      DB_HOST:           postgres
+      DB_PORT:           5432
+      DB_NAME:           ${DB_NAME:-redcell}
+      DB_USER:           ${DB_USER:-postgres}
+      DB_PASSWORD:       ${DB_PASSWORD:-changeme}
+      # ChromaDB
+      CHROMA_HOST:       chromadb
+      CHROMA_PORT:       8000
+      # Redis
+      REDIS_HOST:        redis
+      REDIS_PORT:        6379
+      REDIS_PASSWORD:    ${REDIS_PASSWORD:-changeme}
+      # Admin Onay → Kendi Web API'mize bakıyor (Telegram YOK)
+      ADMIN_APPROVAL_API: http://web:8000/api/ajan/onay
+      ADMIN_NOTIFY_API:   http://web:8000/api/admin-onay/talep
+      # Test modu
+      ADMIN_APPROVAL:    ${ADMIN_APPROVAL:-false}
+      DEFAULT_BUDGET:    ${DEFAULT_BUDGET:-500.00}
+    volumes:
+      - contracts_vol:/app/contracts
+      - exploit_store:/app/exploit_store
+    networks:
+      - redcell_net
+
+# ============================================================
+# VOLUMES & NETWORKS
+# ============================================================
+volumes:
+  postgres_data:
+  chroma_data:
+  redis_data:
+  contracts_vol:
+  exploit_store:
+
+networks:
+  redcell_net:
+    driver: bridge

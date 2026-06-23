@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"/>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>REDCELL &#226; Ekip Paneli</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
+
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--red:#c0392b;--red-d:#a93226;--bg:#0a0a0a;--bg2:#0f0f0f;--bg3:#141414;--line:#1a1a1a;--line2:#2a2a2a;--text:#e8e8e0;--muted:#888;--faint:#555;--green:#27ae60;--amber:#e67e22;--blue:#2980b9;}
+body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* LOGIN */
+#login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999}
+.login-box{width:360px;border:.5px solid var(--line2);padding:44px 36px}
+.login-logo{font-family:'Space Mono',monospace;font-size:15px;font-weight:700;letter-spacing:.15em;margin-bottom:8px}
+.login-logo span{color:var(--red)}
+.login-sub{font-size:12px;color:var(--muted);margin-bottom:32px}
+.field{display:flex;flex-direction:column;gap:7px;margin-bottom:14px}
+.field label{font-family:'Space Mono',monospace;font-size:10px;color:var(--faint);letter-spacing:.1em;text-transform:uppercase}
+.field input,.field select,.field textarea{background:var(--bg2);border:.5px solid var(--line2);color:var(--text);padding:10px 12px;font-family:'Space Grotesk',sans-serif;font-size:14px;outline:none;transition:border-color .2s;width:100%}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--red)}
+.field textarea{resize:vertical;min-height:90px;font-family:'Space Mono',monospace;font-size:12px}
+.field select option{background:#1a1a1a}
+.login-btn{width:100%;padding:13px;background:var(--red);color:#fff;border:none;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;margin-top:8px}
+.login-btn:hover{background:var(--red-d)}
+.login-hint{font-size:11px;color:var(--faint);margin-top:14px;font-family:'Space Mono',monospace}
+
+/* APP */
+#app{display:none}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:52px;border-bottom:.5px solid var(--line2);background:rgba(10,10,10,.97);position:sticky;top:0;z-index:100;backdrop-filter:blur(10px)}
+.top-logo{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;letter-spacing:.15em}
+.top-logo span{color:var(--red)}
+.top-r{display:flex;align-items:center;gap:10px}
+.tbtn{font-family:'Space Mono',monospace;font-size:10px;padding:7px 14px;border:.5px solid var(--line2);color:var(--muted);background:none;cursor:pointer;letter-spacing:.08em;text-transform:uppercase;transition:all .2s}
+.tbtn:hover{border-color:var(--muted);color:var(--text)}
+.welcome-badge{font-family:'Space Mono',monospace;font-size:11px;color:var(--text)}
+.welcome-badge span{color:var(--red)}
+
+.main{max-width:1100px;margin:0 auto;padding:28px 24px}
+
+/* PROFIL KARTI */
+.profil-kart{background:var(--bg2);border:.5px solid var(--line2);padding:24px;display:flex;align-items:center;gap:20px;margin-bottom:24px}
+.profil-avatar{width:56px;height:56px;background:var(--bg3);border:.5px solid var(--line2);display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:18px;font-weight:700;color:var(--red);flex-shrink:0}
+.profil-ad{font-size:16px;font-weight:500;color:var(--text)}
+.profil-rol{font-size:13px;color:var(--muted);margin-top:2px}
+.profil-certs{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.cert-badge{font-family:'Space Mono',monospace;font-size:10px;padding:2px 8px;background:rgba(192,57,43,.08);color:var(--red);border:.5px solid rgba(192,57,43,.2)}
+.durum-toggle{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.durum-select{font-family:'Space Mono',monospace;font-size:11px;padding:7px 12px;background:var(--bg3);border:.5px solid var(--line2);color:var(--text);cursor:pointer;outline:none}
+
+/* STAT ROW */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);margin-bottom:24px}
+.stat-c{background:var(--bg);padding:18px 16px}
+.stat-c .n{font-family:'Space Mono',monospace;font-size:24px;font-weight:700;line-height:1}
+.stat-c .l{font-size:11px;color:var(--faint);margin-top:5px}
+.c-red{color:var(--red)}.c-amber{color:var(--amber)}.c-blue{color:var(--blue)}.c-green{color:var(--green)}
+
+/* SECTION */
+.sec-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.sec-head h2{font-size:14px;font-weight:500}
+.sec{margin-bottom:28px}
+
+/* G&#214;REV KARTI */
+.gorev-kart{background:var(--bg);border:.5px solid var(--line2);margin-bottom:10px;overflow:hidden}
+.gorev-head{padding:16px 18px;border-bottom:.5px solid var(--line);display:flex;align-items:center;gap:12px;cursor:pointer;transition:background .15s}
+.gorev-head:hover{background:var(--bg2)}
+.gorev-musteri{font-size:14px;font-weight:500;color:var(--text)}
+.gorev-hizmet{font-size:12px;color:var(--muted);margin-top:2px}
+.gorev-body{display:none;padding:20px 18px;background:var(--bg2)}
+.gorev-body.open{display:block}
+
+/* &#304;LERLEME */
+.ilerleme-wrap{margin-bottom:18px}
+.ilerleme-label{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:6px}
+.ilerleme-bar{height:4px;background:var(--line2)}
+.ilerleme-fill{height:100%;background:var(--green);transition:width .4s ease}
+.ilerleme-input{width:100%;margin-top:6px}
+input[type=range]{accent-color:var(--red);width:100%}
+
+/* BADGE */
+.badge{font-family:'Space Mono',monospace;font-size:10px;padding:3px 9px;letter-spacing:.06em}
+.b-amber{background:rgba(230,126,34,.1);color:var(--amber);border:.5px solid rgba(230,126,34,.3)}
+.b-blue{background:rgba(41,128,185,.1);color:var(--blue);border:.5px solid rgba(41,128,185,.3)}
+.b-green{background:rgba(39,174,96,.1);color:var(--green);border:.5px solid rgba(39,174,96,.3)}
+.b-red{background:rgba(192,57,43,.1);color:var(--red);border:.5px solid rgba(192,57,43,.3)}
+
+/* AKSIYON BUTONLAR */
+.aksiyon-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;padding-top:16px;border-top:.5px solid var(--line)}
+.abtn{font-family:'Space Mono',monospace;font-size:10px;padding:8px 16px;border:.5px solid var(--line2);color:var(--muted);background:none;cursor:pointer;letter-spacing:.08em;text-transform:uppercase;transition:all .2s}
+.abtn:hover{border-color:var(--muted);color:var(--text)}
+.abtn.primary{background:var(--red);color:#fff;border-color:var(--red)}
+.abtn.primary:hover{background:var(--red-d)}
+.abtn.green{border-color:var(--green);color:var(--green)}
+.abtn.green:hover{background:var(--green);color:#0a0a0a}
+
+/* AI RAPOR */
+.ai-box{background:var(--bg3);border:.5px solid var(--line2);padding:18px;margin-top:16px}
+.ai-head{font-family:'Space Mono',monospace;font-size:10px;color:var(--red);letter-spacing:.15em;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.ai-out{font-size:12px;color:var(--muted);line-height:1.8;white-space:pre-wrap;max-height:360px;overflow-y:auto}
+@keyframes ai-p{0%,100%{opacity:.3}50%{opacity:1}}
+.aidot{width:7px;height:7px;background:var(--red);border-radius:50%;animation:ai-p 1s infinite;display:inline-block;margin:0 2px}
+.aidot:nth-child(2){animation-delay:.2s}.aidot:nth-child(3){animation-delay:.4s}
+
+/* BO&#350; */
+.empty{text-align:center;padding:48px;color:var(--faint);font-size:13px}
+.empty i{font-size:40px;display:block;margin-bottom:12px;color:var(--line2)}
+
+/* TOAST */
+.toast{position:fixed;bottom:22px;right:22px;padding:11px 18px;font-family:'Space Mono',monospace;font-size:11px;z-index:9999;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* RAPOR &#214;N&#304;ZLEME */
+.rapor-onizleme{background:#fff;color:#111;padding:40px;font-family:'Courier New',monospace;font-size:12px;line-height:1.8;max-height:500px;overflow-y:auto;margin-top:14px}
+.rapor-onizleme h1{font-size:18px;margin-bottom:4px;color:#111}
+.rapor-onizleme .red{color:#c0392b}
+.rapor-onizleme hr{border:none;border-top:2px solid #c0392b;margin:16px 0}
+.rapor-onizleme pre{white-space:pre-wrap;font-family:inherit}
+</style>
+
+<script src="/static/rc-api.js"></script>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">RED<span>CELL</span> AR-GE</div>
+    <div class="login-sub">Ekip &#220;yesi Paneli</div>
+    <div class="field"><label>Kullan&#305;c&#305; Ad&#305;</label><input type="text" id="l-user" placeholder="kullanici_adi" onkeydown="if(event.key==='Enter')giris()"/></div>
+    <div class="field"><label>&#350;ifre</label><input type="password" id="l-pass" placeholder="&#226;&#226;&#226;&#226;&#226;&#226;&#226;&#226;" onkeydown="if(event.key==='Enter')giris()"/></div>
+    <button class="login-btn" onclick="giris()">Giri&#351; Yap &#226;-'</button>
+    <p class="login-hint">Demo: mehmet / test123 &#194;* ayse / test123 &#194;* can / test123</p>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <div class="top-logo">RED<span>CELL</span> AR-GE <span style="font-size:10px;color:var(--faint);margin-left:8px">Ekip Paneli</span></div>
+    <div class="top-r">
+      <span class="welcome-badge" id="welcome-text">Ho&#351;geldiniz</span>
+      <a href="admin.html" class="tbtn" target="_blank">Admin</a>
+      <button class="tbtn" onclick="cikis()">&#199;&#305;k&#305;&#351;</button>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- PROF&#304;L -->
+    <div class="profil-kart" id="profil-kart"></div>
+
+    <!-- &#304;STAT&#304;ST&#304;KLER -->
+    <div class="stat-row">
+      <div class="stat-c"><div class="n c-blue" id="ps-toplam">0</div><div class="l">Toplam G&#246;rev</div></div>
+      <div class="stat-c"><div class="n c-amber" id="ps-bekleyen">0</div><div class="l">Bekleyen</div></div>
+      <div class="stat-c"><div class="n c-red" id="ps-devam">0</div><div class="l">Devam Eden</div></div>
+      <div class="stat-c"><div class="n c-green" id="ps-tamam">0</div><div class="l">Tamamlanan</div></div>
+    </div>
+
+    <!-- AKT&#304;F G&#214;REVLER -->
+    <div class="sec">
+      <div class="sec-head"><h2>Aktif G&#246;revlerim</h2></div>
+      <div id="aktif-gorevler"></div>
+    </div>
+
+    <!-- TAMAMLANAN -->
+    <div class="sec">
+      <div class="sec-head"><h2>Tamamlanan G&#246;revler</h2></div>
+      <div id="tamam-gorevler"></div>
+    </div>
+
+  </div>
+</div>
+
+
+<script>
+const t3 = {id:'T003',ad:'Lojistik Grup',email:'it@lojistik.com',hizmet:'Sosyal M  hendislik',ozet:'  al    an fark  ndal  k testi ve phishing sim  lasyonu.',hedef:'   ',oncelik:'Normal (1-2 hafta)',kapsam:['Sosyal M  hendislik'],tarih:'2025-06-10',durum:'tamamlandi'};
+    this.save('talepler',[t1,t2,t3]);
+    this.save('gorevler',[
+      {id:'G001',talepId:'T001',atananId:'U002',atananAd:'Ay  e Kaya',hizmet:'Web Uygulama G  venli  i',musteri:'Teknoloji A.  .',durum:'devam',notlar:'Login sayfas  nda SQL injection     phesi. /api/user endpoint kontrol edilecek.',bulgular:'[Y  KSEK] SQL Injection - /login?user= parametresi\n[ORTA] XSS - /search?q= parametresi\n[D      K] A    k X-Frame-Options header eksik',ilerleme:65,baslangicTarih:'2025-06-19'},
+      {id:'G002',talepId:'T003',atananId:'U001',atananAd:'Mehmet Arslan',hizmet:'Sosyal M  hendislik',musteri:'Lojistik Grup',durum:'tamamlandi',notlar:'T  m testler tamamland  .',bulgular:'23/50   al    an phishing linkine t  klad  . 3 kullan  c   credentials girdi.',ilerleme:100,baslangicTarih:'2025-06-10',bitisTarih:'2025-06-14'},
+    ]);
+    this.bildirimEkle('talep','Yeni Talep','Teknoloji A.  .     Web Uygulama G  venli  i',{talepId:'T001'});
+    this.bildirimEkle('sistem','     Atand  ','Web Uygulama G  venli  i     Ay  e Kaya',{talepId:'T001',atananId:'U002'});
+    this.bildirimEkle('durum','Test Ba  lad  ','Finans Ltd.     A   S  zma Testi bekliyor',{talepId:'T002'});
+    this.bildirimEkle('rapor','Rapor Haz  r','Lojistik Grup     Sosyal M  hendislik',{talepId:'T003'});
+  }
+};
+
+
+
+const RC = {
+
+  firma: {
+    ad: 'REDCELL AR-GE',
+    slogan: 'Ofansif Guvenlik & Arastirma',
+    adres: 'Istanbul, Turkiye',
+    telefon: '+90 212 000 00 00',
+    eposta: 'info@redcell.com.tr',
+    web: 'www.redcell.com.tr',
+    gizlilik: 'Bu rapor yalnizca aliciya ozeldir. Izinsiz kopyalanamaz veya dagitulamaz.',
+    yasal: 'REDCELL AR-GE yalnizca yetkili sistemler uzerinde test gerceklestirir.',
+    logo: 'RC'
+  },
+
+  uzmanlikHarita: {
+    'Web Uygulama Guvenligi': ['web','owasp','burp','appsec'],
+    'Ag Sizma Testi': ['network','nmap','pentest','firewall'],
+    'Mobil Uygulama Analizi': ['mobile','android','ios','apk'],
+    'Red Team Operasyonu': ['redteam','apt','c2','lateral'],
+    'IoT Donanim Guvenligi': ['iot','hardware','firmware','embedded'],
+    'Sosyal Muhendislik': ['social','phishing','osint'],
+  },
+
+  get talepler()    { return JSON.parse(/* legacy */ null; // rc_talepler')    ||'[]'); },
+  get raporlar()    { return JSON.parse(/* legacy */ null; // rc_raporlar')    ||'[]'); },
+  get ekip()        { return JSON.parse(/* legacy */ null; // rc_ekip')        ||'[]'); },
+  get bildirimler() { return JSON.parse(/* legacy */ null; // rc_bildirimler') ||'[]'); },
+  get gorevler()    { return JSON.parse(/* legacy */ null; // rc_gorevler')    ||'[]'); },
+
+  save(key, val) { localStorage.setItem('rc_'+key, JSON.stringify(val)); },
+
+  bildirimEkle(tip, baslik, mesaj, meta) {
+    const b = this.bildirimler;
+    const yeni = { id:'B'+Date.now(), tip, baslik, mesaj, meta:meta||{}, tarih:new Date().toISOString(), okundu:false };
+    b.unshift(yeni);
+    if(b.length>100) b.splice(100);
+    this.save('bildirimler', b);
+    localStorage.setItem('rc_son_bildirim', JSON.stringify({...yeni, _ts:Date.now()}));
+    return yeni;
+  },
+
+  bildirimOku(id) {
+    const b = this.bildirimler;
+    const i = b.findIndex(x=>x.id===id);
+    if(i>=0){b[i].okundu=true; this.save('bildirimler',b);}
+  },
+
+  tumunuOku() { this.save('bildirimler', this.bildirimler.map(x=>({...x,okundu:true}))); },
+  okunmamisSayi() { return this.bildirimler.filter(x=>!x.okundu).length; },
+
+  talepEkle(veri) {
+    const t = this.talepler;
+    const id = 'T'+String(t.length+1).padStart(3,'0');
+    const talep = { id, ...veri, tarih:new Date().toISOString().slice(0,10), durum:'bekleyen' };
+    t.push(talep);
+    this.save('talepler', t);
+    const atanan = this.otomatikAta(talep);
+    this.bildirimEkle('talep','Yeni Talep', talep.ad+' - '+talep.hizmet, { talepId:id });
+    return talep;
+  },
+
+  talepDurumGuncelle(id, yeniDurum) {
+    const t = this.talepler;
+    const i = t.findIndex(x=>x.id===id);
+    if(i<0) return null;
+    t[i].durum = yeniDurum;
+    this.save('talepler', t);
+    this.bildirimEkle('durum','Durum Guncellendi', t[i].ad+' - '+yeniDurum, { talepId:id });
+    return t[i];
+  },
+
+  talepSil(id) {
+    this.save('talepler', this.talepler.filter(x=>x.id!==id));
+    this.save('gorevler', this.gorevler.filter(x=>x.talepId!==id));
+  },
+
+  raporKaydet(talepId, icerik, tip) {
+    const r = this.raporlar;
+    const talep = this.talepler.find(t=>t.id===talepId)||{};
+    const id = 'R'+String(r.length+1).padStart(3,'0');
+    const rapor = { id, talepId, ad:talep.ad||'', hizmet:talep.hizmet||'', tarih:new Date().toISOString().slice(0,10), icerik, tip:tip||'text' };
+    r.push(rapor);
+    this.save('raporlar', r);
+    this.talepDurumGuncelle(talepId,'tamamlandi');
+    const g = this.gorevler;
+    const gi = g.findIndex(x=>x.talepId===talepId);
+    if(gi>=0){ g[gi].durum='tamamlandi'; g[gi].bitisTarih=new Date().toISOString().slice(0,10); this.save('gorevler',g); }
+    this.bildirimEkle('rapor','Rapor Hazirlandi', rapor.ad+' - '+rapor.hizmet, { raporId:id, talepId });
+    return rapor;
+  },
+
+  raporSil(id) { this.save('raporlar', this.raporlar.filter(x=>x.id!==id)); },
+
+  otomatikAta(talep) {
+    const ekip = this.ekip.filter(u => u.durum === 'available');
+    if(!ekip.length) return null;
+    const hizmetAnahtarlar = this.uzmanlikHarita[talep.hizmet] || [];
+    const skorlar = ekip.map(u => {
+      const certStr = ((u.cert||[]).join(' ') + ' ' + (u.uzmanlik||[]).join(' ')).toLowerCase();
+      const uzmanlikSkoru = hizmetAnahtarlar.reduce((s,k) => s + (certStr.includes(k)?2:0), 0);
+      const yukSkoru = -(this.gorevler.filter(g=>g.atananId===u.id&&g.durum==='devam').length);
+      return { uye:u, skor: uzmanlikSkoru + yukSkoru };
+    });
+    skorlar.sort((a,b) => b.skor - a.skor);
+    const secilen = skorlar[0]?.uye;
+    if(!secilen) return null;
+    this.gorevEkle({ talepId:talep.id, atananId:secilen.id, atananAd:secilen.ad, hizmet:talep.hizmet, musteri:talep.ad, durum:'bekleyen', notlar:'', bulgular:'', ilerleme:0 });
+    const e = this.ekip;
+    const ei = e.findIndex(x=>x.id===secilen.id);
+    if(ei>=0){ e[ei].durum='busy'; this.save('ekip',e); }
+    this.bildirimEkle('sistem','Is Atandi', talep.hizmet+' -> '+secilen.ad, { talepId:talep.id, atananId:secilen.id });
+    return secilen;
+  },
+
+  manuelAta(talepId, uyeId) {
+    const talep = this.talepler.find(t=>t.id===talepId);
+    const uye = this.ekip.find(u=>u.id===uyeId);
+    if(!talep||!uye) return false;
+    const g = this.gorevler.filter(x=>x.talepId!==talepId);
+    this.save('gorevler', g);
+    this.gorevEkle({ talepId, atananId:uyeId, atananAd:uye.ad, hizmet:talep.hizmet, musteri:talep.ad, durum:'devam', notlar:'', bulgular:'', ilerleme:0 });
+    const e = this.ekip;
+    const ei = e.findIndex(x=>x.id===uyeId);
+    if(ei>=0){ e[ei].durum='busy'; this.save('ekip',e); }
+    this.bildirimEkle('sistem','Manuel Atama', talep.hizmet+' -> '+uye.ad, {talepId, atananId:uyeId});
+    return true;
+  },
+
+  gorevEkle(veri) {
+    const g = this.gorevler;
+    const id = 'G'+String(g.length+1).padStart(3,'0');
+    g.push({ id, ...veri, baslangicTarih:new Date().toISOString().slice(0,10) });
+    this.save('gorevler', g);
+    return id;
+  },
+
+  gorevGuncelle(id, degisiklikler) {
+    const g = this.gorevler;
+    const i = g.findIndex(x=>x.id===id);
+    if(i<0) return;
+    Object.assign(g[i], degisiklikler);
+    this.save('gorevler', g);
+    if(degisiklikler.durum==='tamamlandi') {
+      const e = this.ekip;
+      const ei = e.findIndex(u=>u.id===g[i].atananId);
+      if(ei>=0){
+        const aktif = g.filter(x=>x.atananId===e[ei].id&&x.durum==='devam'&&x.id!==id).length;
+        if(!aktif){ e[ei].durum='available'; this.save('ekip',e); }
+      }
+    }
+  },
+
+  uyeEkle(veri) {
+    const e = this.ekip;
+    const id = 'U'+String(e.length+1).padStart(3,'0');
+    e.push({ id, ...veri, kayitTarih:new Date().toISOString().slice(0,10) });
+    this.save('ekip', e);
+    return id;
+  },
+
+  uyeGuncelle(id, degisiklikler) {
+    const e = this.ekip;
+    const i = e.findIndex(x=>x.id===id);
+    if(i>=0){ Object.assign(e[i], degisiklikler); this.save('ekip',e); }
+  },
+
+  uyeSil(id) {
+    this.save('ekip', this.ekip.filter(u=>u.id!==id));
+    this.save('gorevler', this.gorevler.filter(g=>g.atananId!==id));
+  },
+
+  girisYap(user, pass, rol) {
+    if(rol==='ekip') {
+      const uye = this.ekip.find(u=>u.kullanici===user && u.sifre===pass);
+      return uye ? {ok:true, uye} : {ok:false, uye:null};
+    }
+    const kayitliPass = /* legacy */ null; // rc_pass')||'redcell2025';
+    return {ok: user==='admin' && pass===kayitliPass, uye:null};
+  },
+
+  sifreDegistir(yeni) { localStorage.setItem('rc_pass', yeni); },
+
+  demoyukle() {
+    if(this.talepler.length) return;
+    this.save('ekip',[
+      {id:'U001',ad:'Mehmet Arslan',rol:'Lead Penetration Tester',cert:['OSCP','CEH'],uzmanlik:['web','network','pentest'],durum:'available',kullanici:'mehmet',sifre:'test123',eposta:'mehmet@redcell.com.tr',kayitTarih:'2024-01-10'},
+      {id:'U002',ad:'Ayse Kaya',rol:'Web Security Specialist',cert:['eWPTX','GWAPT'],uzmanlik:['web','owasp','appsec','burp'],durum:'available',kullanici:'ayse',sifre:'test123',eposta:'ayse@redcell.com.tr',kayitTarih:'2024-02-15'},
+      {id:'U003',ad:'Can Demir',rol:'Red Team Operator',cert:['CRTO','OSCP'],uzmanlik:['redteam','apt','lateral','c2'],durum:'available',kullanici:'can',sifre:'test123',eposta:'can@redcell.com.tr',kayitTarih:'2024-03-20'},
+    ]);
+    this.save('talepler',[
+      {id:'T001',ad:'Teknoloji A.S.',email:'it@teknoloji.com',hizmet:'Web Uygulama Guvenligi',ozet:'E-ticaret platformumuzda kapsamli pentest istiyoruz.',hedef:'https://app.teknoloji.com',oncelik:'Normal',kapsam:['Web Uygulamasi','API'],tarih:'2025-06-18',durum:'devam'},
+      {id:'T002',ad:'Finans Ltd.',email:'ciso@finans.com',hizmet:'Ag Sizma Testi',ozet:'Kurumsal ag altyapisinda sizma testi.',hedef:'10.0.0.0/24',oncelik:'Yuksek',kapsam:['Ic Ag','Dis Ag'],tarih:'2025-06-15',durum:'bekleyen'},
+      {id:'T003',ad:'Lojistik Grup',email:'it@lojistik.com',hizmet:'Sosyal Muhendislik',ozet:'Calis n farkindalik testi.',hedef:'-',oncelik:'Normal',kapsam:['Sosyal Muhendislik'],tarih:'2025-06-10',durum:'tamamlandi'},
+    ]);
+    this.save('gorevler',[
+      {id:'G001',talepId:'T001',atananId:'U002',atananAd:'Ayse Kaya',hizmet:'Web Uygulama Guvenligi',musteri:'Teknoloji A.S.',durum:'devam',notlar:'Login sayfasinda SQL injection suphe mevcut.',bulgular:'[YUKSEK] SQL Injection - /login\n[ORTA] XSS - /search',ilerleme:65,baslangicTarih:'2025-06-19'},
+      {id:'G002',talepId:'T003',atananId:'U001',atananAd:'Mehmet Arslan',hizmet:'Sosyal Muhendislik',musteri:'Lojistik Grup',durum:'tamamlandi',notlar:'Tum testler tamamlandi.',bulgular:'23/50 calisan phishing linkine tiklad .',ilerleme:100,baslangicTarih:'2025-06-10',bitisTarih:'2025-06-14'},
+    ]);
+    this.bildirimEkle('talep','Yeni Talep','Teknoloji A.S. - Web Uygulama Guvenligi',{talepId:'T001'});
+    this.bildirimEkle('sistem','Is Atandi','Web Uygulama Guvenligi -> Ayse Kaya',{talepId:'T001',atananId:'U002'});
+    this.bildirimEkle('rapor','Rapor Hazir','Lojistik Grup - Sosyal Muhendislik',{talepId:'T003'});
+  }
+};
+
+
+let mevcutUye = null;
+
+//
+function giris(){
+  const user = document.getElementById('l-user').value.trim();
+  const pass = document.getElementById('l-pass').value;
+  RC.demoyukle();
+  const sonuc = RC.girisYap(user, pass, 'ekip');
+  if(sonuc.ok){
+    mevcutUye = sonuc.uye;
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='block';
+    document.getElementById('welcome-text').innerHTML = 'Ho geldiniz, <span>'+mevcutUye.ad+'</span>';
+    renderPanel();
+    setInterval(renderPanel, 4000);
+    window.addEventListener('storage', e=>{
+      if(['rc_gorevler','rc_talepler','rc_bildirimler'].includes(e.key)) renderPanel();
+    });
+  } else {
+    alert('Kullan c  ad  veya  ifre hatal .');
+  }
+}
+
+function cikis(){
+  mevcutUye=null;
+  document.getElementById('app').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+}
+
+//
+function renderPanel(){
+  if(!mevcutUye) return;
+  const gorevler = RC.gorevler.filter(g=>g.atananId===mevcutUye.id);
+  const bekleyen = gorevler.filter(g=>g.durum==='bekleyen');
+  const devam    = gorevler.filter(g=>g.durum==='devam');
+  const tamam    = gorevler.filter(g=>g.durum==='tamamlandi');
+
+  //
+  document.getElementById('profil-kart').innerHTML = `
+    <div class="profil-avatar">${initials(mevcutUye.ad)}</div>
+    <div style="flex:1">
+      <div class="profil-ad">${mevcutUye.ad}</div>
+      <div class="profil-rol">${mevcutUye.rol}</div>
+      <div class="profil-certs">${(mevcutUye.cert||[]).map(c=>`<span class="cert-badge">${c}</span>`).join('')}</div>
+    </div>
+    <div class="durum-toggle">
+      <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--faint);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">Durum</div>
+      <select class="durum-select" onchange="durumGuncelle(this.value)">
+        <option value="available" ${mevcutUye.durum==='available'?'selected':''}>M\u00FCsait</option>
+        <option value="busy"      ${mevcutUye.durum==='busy'?'selected':''}>Projede</option>
+        <option value="off"       ${mevcutUye.durum==='off'?'selected':''}>\u0130zinde</option>
+      </select>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">E-posta: ${mevcutUye.eposta||' '}</div>
+    </div>`;
+
+  //
+  document.getElementById('ps-toplam').textContent  = gorevler.length;
+  document.getElementById('ps-bekleyen').textContent = bekleyen.length;
+  document.getElementById('ps-devam').textContent    = devam.length;
+  document.getElementById('ps-tamam').textContent    = tamam.length;
+
+  //
+  const aktifEl = document.getElementById('aktif-gorevler');
+  const aktif = [...bekleyen, ...devam];
+  aktifEl.innerHTML = aktif.length
+    ? aktif.map(g=>gorevKartHTML(g)).join('')
+    : '<div class="empty"><i class="ti ti-check"></i> u an aktif g rev yok</div>';
+
+  //
+  const tamamEl = document.getElementById('tamam-gorevler');
+  tamamEl.innerHTML = tamam.length
+    ? tamam.map(g=>gorevKartHTML(g, true)).join('')
+    : '<div class="empty" style="padding:24px"><i class="ti ti-clock"></i>Hen z tamamlanan g rev yok</div>';
+}
+
+//
+function gorevKartHTML(g, compact){
+  const bm = {bekleyen:'b-amber',devam:'b-blue',tamamlandi:'b-green'};
+  const bl = {bekleyen:'Bekleyen',devam:'Devam Ediyor',tamamlandi:'Tamamland '};
+  const talep = RC.talepler.find(t=>t.id===g.talepId)||{};
+
+  return `<div class="gorev-kart">
+    <div class="gorev-head" onclick="toggleGorev('${g.id}')">
+      <div style="flex:1">
+        <div class="gorev-musteri">${g.musteri}</div>
+        <div class="gorev-hizmet">${g.hizmet} \u00C2\u00B7 Ba\u015Flang\u0131\u00E7: ${g.baslangicTarih}</div>
+      </div>
+      <span class="badge ${bm[g.durum]||'b-amber'}">${bl[g.durum]||g.durum}</span>
+      <i class="ti ti-chevron-down" style="font-size:14px;color:var(--faint);margin-left:8px"></i>
+    </div>
+    <div class="gorev-body" id="gb-${g.id}">
+      ${!compact ? `
+      <!--   LERLEME -->
+      <div class="ilerleme-wrap">
+        <div class="ilerleme-label">
+          <span>  lerleme</span>
+          <span id="ilerleme-val-${g.id}">${g.ilerleme||0}%</span>
+        </div>
+        <div class="ilerleme-bar"><div class="ilerleme-fill" id="ilerleme-bar-${g.id}" style="width:${g.ilerleme||0}%"></div></div>
+        <input type="range" min="0" max="100" value="${g.ilerleme||0}" step="5"
+          oninput="ilerlemeGuncelle('${g.id}',this.value)"
+          style="margin-top:8px"/>
+      </div>
+      ` : `<div style="margin-bottom:14px"><div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--green);margin-bottom:4px">TAMAMLANDI     ${g.bitisTarih||''}</div></div>`}
+
+      <!-- NOTLAR -->
+      <div class="field">
+        <label>Notlar & G\u00F6zlemler</label>
+        <textarea id="notlar-${g.id}" ${compact?'readonly':''} style="background:var(--bg);border:.5px solid var(--line2);color:var(--text);padding:10px;font-family:'Space Mono',monospace;font-size:12px;width:100%;min-height:80px;outline:none;resize:vertical${compact?';opacity:.7':''}">${g.notlar||''}</textarea>
+      </div>
+
+      <!-- BULGULAR -->
+      <div class="field" style="margin-top:10px">
+        <label>Test Bulgular\u0131 (ara\u00E7 \u00E7\u0131kt\u0131s\u0131 / manuel)</label>
+        <textarea id="bulgular-${g.id}" ${compact?'readonly':''} style="background:var(--bg);border:.5px solid var(--line2);color:var(--text);padding:10px;font-family:'Space Mono',monospace;font-size:12px;width:100%;min-height:120px;outline:none;resize:vertical${compact?';opacity:.7':''}" placeholder="Nmap, Burp Suite, Nikto \u00E7\u0131kt\u0131s\u0131 veya manuel bulgular\u0131n\u0131z\u0131 buraya yaz\u0131n...&#10;&#10;\u00D6rnek:&#10;[KR\u0130T\u0130K] SQL Injection - /login?id= parametresi (CVSS: 9.8)&#10;[Y\u00DCKSEK] XSS Stored - /yorum endpoint (CVSS: 7.5)">${g.bulgular||''}</textarea>
+      </div>
+
+      ${!compact ? `
+      <!-- M    TER   B  LG  LER   -->
+      <div style="background:var(--bg3);border:.5px solid var(--line);padding:12px 14px;margin-top:12px;font-size:12px">
+        <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--faint);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">M    teri Bilgileri</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;color:var(--muted)">
+          <div><span style="color:var(--faint)">E-posta:</span> ${talep.email||' '}</div>
+          <div><span style="color:var(--faint)">Hedef:</span> ${talep.hedef||' '}</div>
+          <div><span style="color:var(--faint)">  ncelik:</span> ${talep.oncelik||' '}</div>
+          <div><span style="color:var(--faint)">NDA:</span> ${talep.nda||' '}</div>
+        </div>
+        ${talep.ozet?`<div style="margin-top:8px;color:var(--muted);font-size:12px">${talep.ozet}</div>`:''}
+      </div>
+
+      <div class="aksiyon-row">
+        <button class="abtn" onclick="kaydet('${g.id}')"><i class="ti ti-device-floppy"></i> Kaydet</button>
+        <button class="abtn green" onclick="raporUret('${g.id}')"><i class="ti ti-sparkles"></i> AI Rapor   ret</button>
+        ${g.durum!=='tamamlandi'?`<button class="abtn primary" onclick="tamamla('${g.id}')"><i class="ti ti-check"></i> Tamamland\u0131 \u0130\u015Faretle</button>`:''}
+      </div>
+      <div id="rapor-alan-${g.id}"></div>
+      ` : `
+      <div class="aksiyon-row">
+        <button class="abtn" onclick="raporGoster('${g.talepId}')"><i class="ti ti-file-text"></i> Raporu G  r</button>
+      </div>
+      `}
+    </div>
+  </div>`;
+}
+
+//
+function toggleGorev(id){
+  const el = document.getElementById('gb-'+id);
+  el.classList.toggle('open');
+}
+
+function ilerlemeGuncelle(id, val){
+  document.getElementById('ilerleme-val-'+id).textContent = val+'%';
+  document.getElementById('ilerleme-bar-'+id).style.width = val+'%';
+}
+
+function durumGuncelle(yeniDurum){
+  RC.uyeGuncelle(mevcutUye.id, {durum:yeniDurum});
+  mevcutUye.durum = yeniDurum;
+  toast('Durum g ncellendi');
+}
+
+function kaydet(gorevId){
+  const notlar   = document.getElementById('notlar-'+gorevId)?.value||'';
+  const bulgular = document.getElementById('bulgular-'+gorevId)?.value||'';
+  const ilerleme = parseInt(document.querySelector(`#gb-${gorevId} input[type=range]`)?.value||'0');
+  RC.gorevGuncelle(gorevId, {notlar, bulgular, ilerleme, durum: ilerleme>=100?'tamamlandi':'devam'});
+  toast('    Kaydedildi');
+  renderPanel();
+}
+
+function tamamla(gorevId){
+  const notlar   = document.getElementById('notlar-'+gorevId)?.value||'';
+  const bulgular = document.getElementById('bulgular-'+gorevId)?.value||'';
+  if(!confirm('G revi tamamland  olarak i aretlemek istiyor musunuz?')) return;
+  RC.gorevGuncelle(gorevId, {notlar, bulgular, ilerleme:100, durum:'tamamlandi', bitisTarih:new Date().toISOString().slice(0,10)});
+  toast('    G rev tamamland !');
+  renderPanel();
+}
+
+function raporGoster(talepId){
+  const rapor = RC.raporlar.find(r=>r.talepId===talepId);
+  if(!rapor){ alert('Rapor hen z olu turulmam  .'); return; }
+  pdfAc(rapor, RC.talepler.find(t=>t.id===talepId)||{}, rapor.icerik);
+}
+
+//
+async function raporUret(gorevId){
+  const g = RC.gorevler.find(x=>x.id===gorevId);
+  if(!g){ toast('G rev bulunamad ','var(--red)'); return; }
+  const talep = RC.talepler.find(t=>t.id===g.talepId)||{};
+  const notlar   = document.getElementById('notlar-'+gorevId)?.value || g.notlar || '';
+  const bulgular = document.getElementById('bulgular-'+gorevId)?.value || g.bulgular || '';
+
+  if(!bulgular && !notlar){
+    toast('L tfen  nce bulgular alan n  doldurun','var(--amber)');
+    return;
+  }
+
+  //
+  RC.gorevGuncelle(gorevId, {notlar, bulgular});
+
+  const alan = document.getElementById('rapor-alan-'+gorevId);
+  alan.innerHTML = `<div class="ai-box"><div class="ai-head"><span class="aidot"></span><span class="aidot"></span><span class="aidot"></span> Rapor haz\u0131rlan\u0131yor...</div></div>`;
+
+  const f = RC.firma;
+  const atanan = mevcutUye;
+
+  const prompt = `Sen k\u0131demli bir siber g\u00FCvenlik uzman\u0131s\u0131n. A\u015Fa\u011F\u0131daki bilgilere g\u00F6re profesyonel bir T\u00FCrk\u00E7e g\u00FCvenlik raporu haz\u0131rla.
+
+RAPOR FORMATI \u00E2 MUTLAKA BU SIRALAMAYI \u0130ZLE:
+
+\u00E2\u0095\u0090\u00E2\u0095\u0090\u00E2\u0095\u0090 REDCELL AR-GE \u00E2 G\u00DCVENL\u0130K DE\u011EERLEND\u0130RME RAPORU \u00E2\u0095\u0090\u00E2\u0095\u0090\u00E2\u0095\u0090
+
+M\u00DC\u015ETER\u0130: ${talep.ad||g.musteri}
+H\u00B0ZMET: ${g.hizmet}
+HEDEF: ${talep.hedef||' '}
+KAPSAM: ${(talep.kapsam||[]).join(', ')||' '}
+TAR\u0130H: ${new Date().toLocaleDateString('tr-TR')}
+UZMAN: ${atanan.ad} (${(atanan.cert||[]).join(', ')})
+RAPOR NO: R${Date.now().toString().slice(-6)}
+
+\u00E2\u00E2\u00E2\u00E2\u00E2\u00E2\u00E2\u00E2\u00E2\u00E2\u00E2\u00E2\u00E2\u00E2\u00E2\u00E2\u00E2\u00E2\u00E2\u00E2\u00E2\u00E2\u00E2\u00E2\u00E2\u00E2\u00E2\u00E2\u00E2\u00E2\u00E2\u00E2\u00E2\u00E2\u00E2\u00E2\u00E2\u00E2\u00E2\u00E2\u00E2
+
+1. Y\u00D6NET\u0130C\u0130 \u00D6ZET\u0130
+[2-3 paragraf, teknik olmayan dil, \u00FCst y\u00F6netim i\u00E7in]
+
+2. KAPSAM VE METODOLOJ\u0130
+[Test kapsam\u0131, kullan\u0131lan ara\u00E7lar ve metodoloji]
+
+3. R\u0130SK \u00D6ZET\u0130
+[Kritik: X | Y\u00FCksek: X | Orta: X | D\u00FC\u015F\u00FCk: X]
+[Genel Risk Skoru: X.X/10]
+
+4. TESP\u0130T ED\u0130LEN ZAF\u0130YETLER
+Her zafiyet i\u00E7in:
+---
+BA\u015ELIK: 
+SEV\u0130YE: [KR\u0130T\u0130K/Y\u00DCKSEK/ORTA/D\u00DC\u015E\u00DCK]
+CVSS SKORU: X.X
+ETK\u0130LENEN ALAN: 
+A\u00C7IKLAMA: 
+ETK\u0130: 
+KANIT/POC: 
+\u00D6NER\u0130: 
+---
+
+5. GENEL G\u00DCVENL\u0130K DE\u011EERLEND\u0130RMES\u0130
+
+6. \u00D6NCEL\u0130KL\u0130 D\u00DCZELTME ADIMLARI
+[Numaral\u0131 liste]
+
+7. SONU\u00C7
+
+TEST NOTLARI VE BULGULAR:
+${notlar ? 'NOTLAR:\n'+notlar+'\n\n' : ''}${bulgular ? 'BULGULAR:\n'+bulgular : ''}
+
+\u00D6ZET B\u0130LG\u0130LER:
+${talep.ozet||''}`;
+
+  try{
+    const res = await fetch('https://
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({model:'claude-sonnet-4-6', max_tokens:1000, messages:[{role:'user',content:prompt}]})
+    });
+    const data = await res.json();
+    const icerik = data.content?.map(c=>c.text||'').join('')||'Rapor   retilemedi.';
+
+    alan.innerHTML = `<div class="ai-box">
+      <div class="ai-head"><i class="ti ti-check" style="font-size:13px"></i> Rapor Haz\u0131r</div>
+      <div class="ai-out">${icerik}</div>
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button onclick="raporuOnayla('${gorevId}','${g.talepId}')" class="abtn primary"><i class="ti ti-check"></i> Onayla & Kaydet</button>
+        <button onclick="raporuPdfGoster('${gorevId}')" class="abtn green"><i class="ti ti-printer"></i> PDF \u00D6nizle</button>
+        <button onclick="raporuRet('${gorevId}')" class="abtn" style="color:var(--red);border-color:var(--red)">Yeniden \u00DCret</button>
+      </div>
+    </div>`;
+
+    //
+    sessionStorage.setItem('gecici_rapor_'+gorevId, icerik);
+    toast('    Rapor haz  rland  ');
+  }catch(e){
+    alan.innerHTML = `<div class="ai-box"><div class="ai-out" style="color:var(--red)">Hata: ${e.message}</div></div>`;
+  }
+}
+
+function raporuOnayla(gorevId, talepId){
+  const icerik = sessionStorage.getItem('gecici_rapor_'+gorevId);
+  if(!icerik){ toast('Rapor bulunamad  ','var(--red)'); return; }
+  const g = RC.gorevler.find(x=>x.id===gorevId);
+  const talep = RC.talepler.find(t=>t.id===talepId)||{};
+  const rapor = RC.raporKaydet(talepId, icerik, 'text');
+  RC.gorevGuncelle(gorevId, {durum:'tamamlandi', ilerleme:100, bitisTarih:new Date().toISOString().slice(0,10)});
+  sessionStorage.removeItem('gecici_rapor_'+gorevId);
+  toast('    Rapor onayland   ve sisteme kaydedildi     '+rapor.id);
+  renderPanel();
+}
+
+function raporuRet(gorevId){
+  sessionStorage.removeItem('gecici_rapor_'+gorevId);
+  document.getElementById('rapor-alan-'+gorevId).innerHTML='';
+  toast('Yeniden   retmek i  in tekrar "AI Rapor \u00DCret"e bas  n');
+}
+
+function raporuPdfGoster(gorevId){
+  const icerik = sessionStorage.getItem('gecici_rapor_'+gorevId)||'';
+  const g = RC.gorevler.find(x=>x.id===gorevId)||{};
+  const talep = RC.talepler.find(t=>t.id===g.talepId)||{};
+  pdfAc({id:'  N  ZLEME',tarih:new Date().toISOString().slice(0,10)}, talep, icerik);
+}
+
+function pdfAc(rapor, talep, icerik){
+  const f = RC.firma;
+  const win = window.open('','_blank');
+  win.document.write(`<!DOCTYPE html><html lang="tr"><head><meta charset="UTF-8">
+<title>REDCELL \u00E2 ${rapor.id} \u00E2 ${talep.ad||''}</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Courier New',monospace;background:#fff;color:#111;padding:0}
+  .kapak{background:#0a0a0a;color:#e8e8e0;padding:60px 48px;page-break-after:always}
+  .kapak-logo{font-size:32px;font-weight:700;letter-spacing:.1em;margin-bottom:4px}
+  .kapak-logo span{color:#c0392b}
+  .kapak-slogan{font-size:12px;color:#888;letter-spacing:.2em;text-transform:uppercase;margin-bottom:48px}
+  .kapak-baslik{font-size:16px;color:#888;letter-spacing:.2em;text-transform:uppercase;margin-bottom:16px}
+  .kapak-musteri{font-size:36px;font-weight:700;color:#e8e8e0;margin-bottom:8px}
+  .kapak-hizmet{font-size:18px;color:#c0392b;margin-bottom:48px}
+  .kapak-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;color:#888;border-top:.5px solid #2a2a2a;padding-top:24px}
+  .kapak-meta .k{color:#555;font-size:10px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:2px}
+  .kapak-meta .v{color:#e8e8e0}
+  .kapak-firma{margin-top:48px;padding-top:24px;border-top:.5px solid #2a2a2a;display:flex;justify-content:space-between;align-items:flex-end;font-size:11px;color:#555}
+  .icerik{padding:48px;max-width:none}
+  .icerik pre{white-space:pre-wrap;font-family:'Courier New',monospace;font-size:12px;line-height:1.8;color:#111}
+  .gizlilik-kutu{background:#f8f8f8;border:1px solid #eee;border-left:4px solid #c0392b;padding:16px 20px;margin:32px 0;font-size:11px;color:#666;line-height:1.6}
+  .yasal-kutu{background:#fffbf0;border:1px solid #f0e8d0;border-left:4px solid #e67e22;padding:16px 20px;margin:16px 0;font-size:11px;color:#666;line-height:1.6}
+  .footer{text-align:center;padding:24px;border-top:1px solid #eee;font-size:10px;color:#aaa;margin-top:32px}
+  @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}.kapak{page-break-after:always}}
+</style></head><body>
+
+<div class="kapak">
+  <div class="kapak-logo">${f.logo||'RC'}<span>CELL</span></div>
+  <div class="kapak-slogan">${f.slogan}</div>
+  <div class="kapak-baslik">G\u00FCvenlik De\u011Ferlendirme Raporu</div>
+  <div class="kapak-musteri">${talep.ad||'M    teri'}</div>
+  <div class="kapak-hizmet">${talep.hizmet||rapor.hizmet||''}</div>
+  <div class="kapak-meta">
+    <div><div class="k">Rapor No</div><div class="v">${rapor.id}</div></div>
+    <div><div class="k">Tarih</div><div class="v">${rapor.tarih}</div></div>
+    <div><div class="k">Hedef Sistem</div><div class="v">${talep.hedef||'   '}</div></div>
+    <div><div class="k">\u00D6ncelik</div><div class="v">${talep.oncelik||'   '}</div></div>
+    <div><div class="k">Kapsam</div><div class="v">${(talep.kapsam||[]).join(', ')||'   '}</div></div>
+    <div><div class="k">NDA</div><div class="v">${talep.nda||'   '}</div></div>
+  </div>
+  <div class="kapak-firma">
+    <span>${f.ad} \u00C2\u00B7 ${f.adres}</span>
+    <span>${f.eposta} \u00C2\u00B7 ${f.web}</span>
+  </div>
+</div>
+
+<div class="icerik">
+  <div class="gizlilik-kutu"><strong>G\u0130ZL\u0130L\u0130K UYARISI:</strong><br/>${f.gizlilik}</div>
+  <pre>${icerik}</pre>
+  <div class="yasal-kutu"><strong>YASAL UYARI:</strong><br/>${f.yasal}</div>
+  <div class="footer">${f.ad} &copy; ${new Date().getFullYear()} \u00C2\u00B7 ${f.telefon} \u00C2\u00B7 ${f.eposta} \u00C2\u00B7 ${f.web}</div>
+</div>
+<script>window.onload=function(){window.print();}<\/script>
+</body></html>`);
+  win.document.close();
+}
+
+//
+function initials(ad){ return (ad||'').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(); }
+function toast(msg, renk){
+  renk=renk||'var(--green)';
+  const t=document.createElement('div');
+  t.className='toast';
+  t.style.cssText=`background:var(--bg2);border:.5px solid ${renk};color:${renk}`;
+  t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),3000);
+}
+</script>
+</body>
+</html>

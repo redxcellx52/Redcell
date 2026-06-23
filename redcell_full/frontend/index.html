@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>REDCELL AR-GE | Siber G&#252;venlik Ara&#351;t&#305;rma Ekibi</title>
+  <meta name="description" content="REDCELL, T&#252;rkiye'nin &#246;nde gelen ofansif siber g&#252;venlik Ar-Ge ekibidir. S&#305;zma testi, red team operasyonu, g&#252;venlik ara&#351;t&#305;rmas&#305; ve dan&#305;&#351;manl&#305;k hizmetleri." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --red: #c0392b;
+      --red-dark: #a93226;
+      --bg: #0a0a0a;
+      --bg-2: #0f0f0f;
+      --line: #1a1a1a;
+      --line-2: #2a2a2a;
+      --text: #e8e8e0;
+      --muted: #888;
+      --faint: #555;
+      --green: #27ae60;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* -- NAV -- */
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 48px;
+      border-bottom: 0.5px solid var(--line-2);
+      position: sticky;
+      top: 0;
+      background: rgba(10,10,10,0.96);
+      backdrop-filter: blur(12px);
+      z-index: 200;
+    }
+
+    .logo {
+      font-family: 'Space Mono', monospace;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: 0.15em;
+      text-decoration: none;
+    }
+    .logo span { color: var(--red); }
+
+    .nav-links {
+      display: flex;
+      gap: 36px;
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: 12px;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    .nav-cta {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      padding: 9px 22px;
+      border: 0.5px solid var(--red);
+      color: var(--red);
+      background: transparent;
+      cursor: pointer;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+    .nav-cta:hover { background: var(--red); color: #fff; }
+
+    /* -- HERO -- */
+    #hero {
+      padding: 120px 48px 100px;
+      position: relative;
+      overflow: hidden;
+      border-bottom: 0.5px solid var(--line);
+      min-height: 80vh;
+      display: flex;
+      align-items: center;
+    }
+
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(192,57,43,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(192,57,43,0.05) 1px, transparent 1px);
+      background-size: 44px 44px;
+      pointer-events: none;
+    }
+
+    .hero-inner { position: relative; max-width: 1200px; width: 100%; }
+
+    .eyebrow {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: var(--red);
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .eyebrow::before {
+      content: '';
+      display: block;
+      width: 36px;
+      height: 0.5px;
+      background: var(--red);
+    }
+
+    h1 {
+      font-size: clamp(38px, 6vw, 68px);
+      font-weight: 700;
+      line-height: 1.05;
+      max-width: 720px;
+      letter-spacing: -0.025em;
+      margin-bottom: 28px;
+    }
+    h1 em { font-style: normal; color: var(--red); }
+
+    .hero-sub {
+      font-size: 16px;
+      color: var(--muted);
+      max-width: 500px;
+      line-height: 1.75;
+      margin-bottom: 52px;
+    }
+
+    .hero-actions { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+
+    .btn-primary {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      padding: 15px 36px;
+      background: var(--red);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: background 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-primary:hover { background: var(--red-dark); }
+
+    .btn-ghost {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      padding: 15px 36px;
+      background: transparent;
+      color: var(--muted);
+      border: 0.5px solid var(--line-2);
+      cursor: pointer;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-ghost:hover { border-color: var(--muted); color: var(--text); }
+
+    .hero-stats {
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 36px;
+      text-align: right;
+    }
+
+    .stat-num {
+      font-family: 'Space Mono', monospace;
+      font-size: 40px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1;
+    }
+    .stat-num span { color: var(--red); }
+    .stat-label {
+      font-size: 11px;
+      color: var(--faint);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-top: 5px;
+    }
+
+    /* -- SECTIONS -- */
+    section { padding: 88px 48px; border-bottom: 0.5px solid var(--line); }
+
+    .sec-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: var(--red);
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      margin-bottom: 48px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .sec-label::after {
+      content: '';
+      display: block;
+      flex: 1;
+      height: 0.5px;
+      background: var(--line-2);
+    }
+
+    /* -- TABS -- */
+    .tabs {
+      display: flex;
+      border-bottom: 0.5px solid var(--line-2);
+      margin-bottom: 0;
+      gap: 0;
+    }
+    .tab {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      padding: 14px 24px;
+      color: var(--faint);
+      cursor: pointer;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border: none;
+      background: none;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -0.5px;
+      transition: all 0.2s;
+      color: var(--faint);
+    }
+    .tab:hover { color: var(--muted); }
+    .tab.active { color: var(--text); border-bottom-color: var(--red); }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* -- SERVICES GRID -- */
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1px;
+      background: var(--line);
+      margin-top: 1px;
+    }
+
+    .service-card {
+      background: var(--bg);
+      padding: 40px 32px;
+      transition: background 0.2s;
+    }
+    .service-card:hover { background: var(--bg-2); }
+
+    .service-icon {
+      width: 44px;
+      height: 44px;
+      border: 0.5px solid var(--line-2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 22px;
+      font-size: 20px;
+      color: var(--red);
+    }
+
+    .service-card h3 {
+      font-size: 15px;
+      font-weight: 500;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+    .service-card p { font-size: 13px; color: var(--faint); line-height: 1.65; }
+
+    /* -- AR-GE TAB -- */
+    .arge-wrap { padding: 48px 0; }
+    .arge-intro {
+      font-size: 14px;
+      color: var(--muted);
+      max-width: 620px;
+      line-height: 1.8;
+      margin-bottom: 40px;
+    }
+
+    .threat-bar { display: flex; flex-direction: column; gap: 18px; max-width: 640px; }
+    .threat-row { display: flex; align-items: center; gap: 16px; }
+    .threat-name {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      color: var(--muted);
+      width: 160px;
+      flex-shrink: 0;
+    }
+    .threat-track { flex: 1; height: 2px; background: var(--line-2); }
+    .threat-fill { height: 100%; background: var(--red); width: 0; transition: width 1.2s ease; }
+    .threat-pct {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      color: var(--red);
+      width: 40px;
+      text-align: right;
+    }
+    .threat-note {
+      font-size: 11px;
+      color: var(--line-2);
+      font-family: 'Space Mono', monospace;
+      margin-top: 14px;
+      color: #444;
+    }
+
+    .terminal {
+      background: var(--bg-2);
+      border: 0.5px solid var(--line-2);
+      padding: 32px;
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      line-height: 2;
+      margin-top: 48px;
+      max-width: 640px;
+    }
+    .t-prompt { color: var(--faint); }
+    .t-cmd { color: var(--text); }
+    .t-out { color: var(--muted); }
+    .t-ok { color: var(--green); }
+    .t-warn { color: var(--red); }
+    .cursor {
+      display: inline-block;
+      width: 9px;
+      height: 14px;
+      background: var(--red);
+      animation: blink 1s step-end infinite;
+      vertical-align: -2px;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    /* -- ABOUT TAB -- */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      padding-top: 48px;
+    }
+    .about-text h2 {
+      font-size: 30px;
+      font-weight: 700;
+      line-height: 1.25;
+      margin-bottom: 20px;
+      letter-spacing: -0.015em;
+    }
+    .about-text p { font-size: 14px; color: var(--muted); line-height: 1.8; margin-bottom: 14px; }
+
+    .cert-head {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: var(--faint);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .cert-list { display: flex; flex-direction: column; gap: 1px; background: var(--line); }
+    .cert-item {
+      background: var(--bg);
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.2s;
+    }
+    .cert-item:hover { background: var(--bg-2); }
+    .cert-name { font-family: 'Space Mono', monospace; font-size: 12px; color: var(--text); }
+    .cert-tag {
+      font-size: 11px;
+      color: var(--green);
+      background: rgba(39,174,96,0.08);
+      padding: 3px 12px;
+      border: 0.5px solid rgba(39,174,96,0.25);
+    }
+
+    /* -- SHOP -- */
+    #magaza { background: var(--bg); }
+
+    .shop-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1px;
+      background: var(--line);
+    }
+
+    .shop-card {
+      background: var(--bg);
+      padding: 32px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      transition: background 0.2s;
+      position: relative;
+    }
+    .shop-card:hover { background: var(--bg-2); }
+
+    .shop-badge {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--red);
+      border: 0.5px solid var(--red);
+      padding: 3px 10px;
+      width: fit-content;
+    }
+
+    .shop-card h4 { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.4; }
+    .shop-card p { font-size: 13px; color: var(--faint); line-height: 1.65; flex: 1; }
+
+    .shop-price {
+      font-family: 'Space Mono', monospace;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .shop-price sup { font-size: 12px; color: var(--muted); font-weight: 400; }
+
+    .shop-btn {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      padding: 11px 18px;
+      background: transparent;
+      color: var(--muted);
+      border: 0.5px solid var(--line-2);
+      cursor: pointer;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: all 0.2s;
+      text-align: center;
+      text-decoration: none;
+      display: block;
+    }
+    .shop-btn:hover { border-color: var(--red); color: var(--red); }
+    .shop-btn.featured { background: var(--red); color: #fff; border-color: var(--red); }
+    .shop-btn.featured:hover { background: var(--red-dark); }
+
+    .popular-badge {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      background: var(--red);
+      text-align: center;
+      padding: 5px;
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      color: #fff;
+      text-transform: uppercase;
+    }
+    .shop-card.featured { border: 1px solid var(--red); padding-top: 48px; }
+
+    /* -- CONTACT -- */
+    #iletisim { background: var(--bg); }
+
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+    }
+
+    .contact-info h2 {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+      margin-bottom: 20px;
+    }
+    .contact-info p { font-size: 14px; color: var(--muted); line-height: 1.8; margin-bottom: 32px; }
+
+    .contact-detail {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .contact-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .contact-row i { font-size: 18px; color: var(--red); }
+
+    .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+    .form-group label {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: var(--faint);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      background: var(--bg-2);
+      border: 0.5px solid var(--line-2);
+      color: var(--text);
+      padding: 12px 16px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+      width: 100%;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus { border-color: var(--red); }
+    .form-group textarea { resize: vertical; min-height: 120px; }
+    .form-group select option { background: #1a1a1a; }
+
+    /* -- FOOTER -- */
+    footer {
+      padding: 40px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .footer-logo {
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      color: #333;
+      text-decoration: none;
+    }
+    .footer-logo span { color: var(--red); }
+    .footer-links { display: flex; gap: 24px; }
+    .footer-links a { font-size: 12px; color: #444; text-decoration: none; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--muted); }
+    .footer-copy { font-size: 12px; color: #333; }
+
+    /* -- MOBILE -- */
+    @media (max-width: 768px) {
+      nav { padding: 16px 24px; }
+      .nav-links { display: none; }
+      #hero { padding: 80px 24px 60px; min-height: auto; }
+      .hero-stats { display: none; }
+      h1 { font-size: 36px; }
+      section { padding: 60px 24px; }
+      .about-grid, .contact-grid { grid-template-columns: 1fr; gap: 40px; }
+      footer { padding: 32px 24px; flex-direction: column; align-items: flex-start; }
+    }
+  
+    /* ---- EKİP BÖLÜMÜ ---- */
+    #ekip-bolumu { padding: 100px 48px; background: var(--bg2); }
+    .ekip-baslik-grup { margin-bottom: 60px; }
+    .ekip-baslik-grup h2 { font-size: 28px; font-weight: 500; margin-bottom: 12px; }
+    .ekip-baslik-grup p { font-size: 14px; color: var(--muted); max-width: 500px; line-height: 1.7; }
+    .hiyerarsi-blok { margin-bottom: 56px; }
+    .hiyerarsi-baslik { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--red); margin-bottom: 20px; padding-bottom: 10px; border-bottom: 0.5px solid var(--line2); }
+    .ekip-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1px; background: var(--line); }
+    .ekip-kart { background: var(--bg); padding: 24px; position: relative; overflow: hidden; transition: background 0.2s; cursor: default; }
+    .ekip-kart:hover { background: var(--bg3); }
+    .ekip-kart:hover .ekip-kart-detay { opacity: 1; transform: translateY(0); }
+    .ekip-foto { width: 64px; height: 64px; background: var(--line2); border-radius: 0; margin-bottom: 14px; position: relative; overflow: hidden; }
+    .ekip-foto-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-family: 'Space Mono', monospace; font-size: 22px; font-weight: 700; color: var(--red); background: linear-gradient(135deg, #1a0000 0%, #0f0f0f 100%); }
+    .ekip-rutbe { font-family: 'Space Mono', monospace; font-size: 9px; color: var(--red); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 6px; }
+    .ekip-ad { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+    .ekip-unvan { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+    .ekip-rozetler { display: flex; flex-wrap: wrap; gap: 4px; }
+    .ekip-rozet { font-family: 'Space Mono', monospace; font-size: 9px; padding: 3px 7px; border: 0.5px solid var(--line2); color: var(--faint); }
+    .ekip-rozet.ozel { border-color: var(--red); color: var(--red); }
+    .ekip-kart-detay { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(10,10,10,0.97); padding: 14px; opacity: 0; transform: translateY(8px); transition: all 0.25s; border-top: 0.5px solid var(--line2); }
+    .ekip-kart-detay p { font-size: 11px; color: var(--muted); line-height: 1.6; margin: 0; }
+    .ekip-uzmanlik-bar { height: 2px; background: var(--line2); margin-top: 8px; }
+    .ekip-uzmanlik-bar-ic { height: 100%; background: var(--red); }
+
+    /* ---- REFERANSLAR ---- */
+    #referanslar { padding: 80px 48px; background: var(--bg); overflow: hidden; }
+    .ref-baslik { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--faint); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 40px; }
+    .ref-scroll-wrap { overflow: hidden; position: relative; }
+    .ref-scroll-wrap::before, .ref-scroll-wrap::after {
+      content: ''; position: absolute; top: 0; bottom: 0; width: 80px; z-index: 1;
+    }
+    .ref-scroll-wrap::before { left: 0; background: linear-gradient(to right, var(--bg), transparent); }
+    .ref-scroll-wrap::after  { right: 0; background: linear-gradient(to left, var(--bg), transparent); }
+    .ref-scroll { display: flex; gap: 0; animation: refScroll 30s linear infinite; width: max-content; }
+    .ref-scroll:hover { animation-play-state: paused; }
+    @keyframes refScroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    .ref-item { padding: 20px 40px; border-right: 0.5px solid var(--line); display: flex; align-items: center; gap: 12px; white-space: nowrap; }
+    .ref-logo-placeholder { width: 32px; height: 32px; background: var(--line2); display: flex; align-items: center; justify-content: center; font-size: 10px; font-family: 'Space Mono', monospace; color: var(--faint); flex-shrink: 0; }
+    .ref-isim { font-family: 'Space Mono', monospace; font-size: 12px; color: var(--muted); letter-spacing: 0.05em; }
+    .ref-gizli { font-size: 10px; color: var(--faint); }
+    .ref-alt-not { margin-top: 32px; font-size: 12px; color: var(--faint); font-family: 'Space Mono', monospace; }
+    .ref-istatistik { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); margin-top: 60px; }
+    .ref-stat { background: var(--bg2); padding: 24px; text-align: center; }
+    .ref-stat-val { font-family: 'Space Mono', monospace; font-size: 32px; font-weight: 700; color: var(--red); }
+    .ref-stat-label { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+    </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="#hero" class="logo">RED<span>CELL</span> AR-GE</a>
+    <ul class="nav-links">
+      <li><a href="#hizmetler">Hizmetler</a></li>
+      <li><a href="#ekip-bolumu" onclick="document.getElementById('ekip-bolumu').scrollIntoView({behavior:'smooth'});return false;">Ekip</a></li>
+        <li><a href="#referanslar" onclick="document.getElementById('referanslar').scrollIntoView({behavior:'smooth'});return false;">Referanslar</a></li>
+        <li><a href="#hakkimizda-tab" id="nav-about" onclick="openTab('hakkimizda'); return true;">Hakk&#305;m&#305;zda</a></li>
+      <li><a href="#magaza">Ma&#287;aza</a></li>
+      <li><a href="#iletisim">&#304;leti&#351;im</a></li>
+    </ul>
+    <a href="#iletisim" class="nav-cta">Teklif Al -&gt;</a>
+  </nav>
+
+  <!-- HERO -->
+  <div id="hero">
+    <div class="hero-grid"></div>
+    <div class="hero-inner">
+      <div class="eyebrow">Siber G&#252;venlik Ar-Ge Ekibi</div>
+      <h1>Sald&#305;r&#305; <em>mant&#305;&#287;&#305;yla</em><br>savunma tasar&#305;m&#305;.</h1>
+      <p class="hero-sub">Sistemlerinizin ger&#231;ek d&#252;&#351;man&#305; bulmadan &#246;nce biz buluruz. Ofansif g&#252;venlik ara&#351;t&#305;rmas&#305;, s&#305;zma testi ve tehdit modellemesi.</p>
+      <div class="hero-actions">
+        <a href="#iletisim" class="btn-primary">De&#287;erlendirme Ba&#351;lat</a>
+        <a href="#magaza" class="btn-ghost">Ma&#287;azaya Git</a>
+      </div>
+      <div class="hero-stats">
+        <div>
+          <div class="stat-num">3<span>K+</span></div>
+          <div class="stat-label">Zafiyet Bulgusu</div>
+        </div>
+        <div>
+          <div class="stat-num">98<span>%</span></div>
+          <div class="stat-label">M&#252;&#351;teri Memnuniyeti</div>
+        </div>
+        <div>
+          <div class="stat-num">12<span>+</span></div>
+          <div class="stat-label">Y&#305;l Deneyim</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- H&#304;ZMETLER -->
+  <section id="hizmetler">
+    <div class="sec-label">Hizmetler</div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="openTab('hizmetler-panel')">S&#305;zma Testi</button>
+      <button class="tab" onclick="openTab('arge-panel')">Ar-Ge</button>
+      <button class="tab" id="hakkimizda-tab" onclick="openTab('hakkimizda-panel')">Hakk&#305;m&#305;zda</button>
+    </div>
+
+    <!-- TAB: S&#305;zma Testi -->
+    <div id="hizmetler-panel" class="tab-panel active">
+      <div class="services-grid">
+        <div class="service-card">
+          <div class="service-icon"><i class="ti ti-network" aria-hidden="true"></i></div>
+          <h3>A&#287; S&#305;zma Testi</h3>
+          <p>&#304;&#231; ve d&#305;&#351; a&#287; altyap&#305;n&#305;zda kapsaml&#305; zafiyet taramas&#305; ve exploit zinciri analizi.</p>
+        </div>
+        <div class="service-card">
+          <div class="service-icon"><i class="ti ti-world-www" aria-hidden="true"></i></div>
+          <h3>Web Uygulama G&#252;venli&#287;i</h3>
+          <p>OWASP Top 10 ve &#246;tesi - i&#351; mant&#305;&#287;&#305; zafiyetleri, API g&#252;venli&#287;i, kimlik do&#287;rulama testleri.</p>
+        </div>
+        <div class="service-card">
+          <div class="service-icon"><i class="ti ti-device-mobile" aria-hidden="true"></i></div>
+          <h3>Mobil Uygulama Analizi</h3>
+          <p>Android ve iOS uygulamalar&#305;nda statik, dinamik ve a&#287; trafi&#287;i analizi.</p>
+        </div>
+        <div class="service-card">
+          <div class="service-icon"><i class="ti ti-cpu" aria-hidden="true"></i></div>
+          <h3>Donan&#305;m & IoT G&#252;venli&#287;i</h3>
+          <p>G&#246;m&#252;l&#252; sistem, firmware tersine m&#252;hendisli&#287;i ve fiziksel g&#252;venlik testleri.</p>
+        </div>
+        <div class="service-card">
+          <div class="service-icon"><i class="ti ti-users" aria-hidden="true"></i></div>
+          <h3>Sosyal M&#252;hendislik</h3>
+          <p>Phishing kampanyalar&#305;, vishing, fiziksel s&#305;zma tatbikatlar&#305; ile insan fakt&#246;r&#252; de&#287;erlendirmesi.</p>
+        </div>
+        <div class="service-card">
+          <div class="service-icon"><i class="ti ti-shield-check" aria-hidden="true"></i></div>
+          <h3>Red Team Operasyonu</h3>
+          <p>APT sim&#252;lasyonu - tam spektrum sald&#305;r&#305; tatbikat&#305; ile savunma ekibinizin haz&#305;rl&#305;&#287;&#305;n&#305; &#246;l&#231;&#252;n.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Ar-Ge -->
+    <div id="arge-panel" class="tab-panel">
+      <div class="arge-wrap">
+        <p class="arge-intro">
+          Ekibimiz aktif CVE ara&#351;t&#305;rmas&#305;, s&#305;f&#305;r g&#252;n ke&#351;fi ve g&#252;venlik ara&#231;lar&#305; geli&#351;tirme alanlar&#305;nda &#231;al&#305;&#351;maktad&#305;r. Akademik kurumlar ve CERT birimleriyle koordineli sorumlu a&#231;&#305;klama politikas&#305; uygulanmaktad&#305;r.
+        </p>
+        <div class="threat-bar">
+          <div class="threat-row">
+            <span class="threat-name">Web Zafiyetleri</span>
+            <div class="threat-track"><div class="threat-fill" data-w="87"></div></div>
+            <span class="threat-pct">87%</span>
+          </div>
+          <div class="threat-row">
+            <span class="threat-name">A&#287; Protokolleri</span>
+            <div class="threat-track"><div class="threat-fill" data-w="72"></div></div>
+            <span class="threat-pct">72%</span>
+          </div>
+          <div class="threat-row">
+            <span class="threat-name">Kriptografi</span>
+            <div class="threat-track"><div class="threat-fill" data-w="65"></div></div>
+            <span class="threat-pct">65%</span>
+          </div>
+          <div class="threat-row">
+            <span class="threat-name">Donan&#305;m / IoT</span>
+            <div class="threat-track"><div class="threat-fill" data-w="54"></div></div>
+            <span class="threat-pct">54%</span>
+          </div>
+          <div class="threat-row">
+            <span class="threat-name">Yapay Zeka G&#252;venli&#287;i</span>
+            <div class="threat-track"><div class="threat-fill" data-w="41"></div></div>
+            <span class="threat-pct">41%</span>
+          </div>
+        </div>
+        <p class="threat-note">Ara&#351;t&#305;rma odak alanlar&#305; - aktif proje da&#287;&#305;l&#305;m&#305;</p>
+
+        <div class="terminal">
+          <div><span class="t-prompt">root@redcell:~$</span> <span class="t-cmd"> ./scan --target internal --mode deep</span></div>
+          <div><span class="t-out">[*] Hedef taran&#305;yor...</span></div>
+          <div><span class="t-out">[*] 1.247 port analiz edildi</span></div>
+          <div><span class="t-ok">[+] CVE-2024-XXXX tespit edildi - kritik</span></div>
+          <div><span class="t-warn">[!] Yama &#246;nerileri raporlan&#305;yor...</span></div>
+          <div><span class="t-out">[*] Rapor: /output/report_2025.pdf</span></div>
+          <div><span class="t-prompt">root@redcell:~$</span> <span class="cursor"></span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Hakk&#305;m&#305;zda -->
+    <div id="hakkimizda-panel" class="tab-panel">
+      <div class="about-grid">
+        <div class="about-text">
+          <h2>Savunmay&#305; sald&#305;rgan d&#252;&#351;&#252;nerek in&#351;a ediyoruz.</h2>
+          <p>REDCELL, 2012'den bu yana T&#252;rkiye ve Avrupa'daki kritik altyap&#305;, fintech ve savunma sanayi kurulu&#351;lar&#305;na ofansif g&#252;venlik hizmetleri sunmaktad&#305;r.</p>
+          <p>Ekibimiz eski CERT uzmanlar&#305;, akademisyenler ve uluslararas&#305; CTF &#351;ampiyonlar&#305;ndan olu&#351;maktad&#305;r. Her proje i&#231;in ba&#287;&#305;ms&#305;z bir ara&#351;t&#305;rma protokol&#252; uygulan&#305;r.</p>
+          <p>T&#252;m hizmetlerimiz NDA kapsam&#305;nda y&#252;r&#252;t&#252;l&#252;r. M&#252;&#351;teri gizlili&#287;i en y&#252;ksek &#246;nceli&#287;imizdir.</p>
+          <a href="#iletisim" class="btn-ghost" style="display:inline-block; margin-top:20px;">Ekiple G&#246;r&#252;&#351; -&gt;</a>
+        </div>
+        <div>
+          <p class="cert-head">Sertifikasyonlar & Akreditasyonlar</p>
+          <div class="cert-list">
+            <div class="cert-item">
+              <span class="cert-name">OSCP - Offensive Security</span>
+              <span class="cert-tag">Aktif</span>
+            </div>
+            <div class="cert-item">
+              <span class="cert-name">CEH - Certified Ethical Hacker</span>
+              <span class="cert-tag">Aktif</span>
+            </div>
+            <div class="cert-item">
+              <span class="cert-name">CREST CRT</span>
+              <span class="cert-tag">Aktif</span>
+            </div>
+            <div class="cert-item">
+              <span class="cert-name">ISO/IEC 27001 Denet&#231;i</span>
+              <span class="cert-tag">Aktif</span>
+            </div>
+            <div class="cert-item">
+              <span class="cert-name">GPEN - GIAC Penetration Tester</span>
+              <span class="cert-tag">Aktif</span>
+            </div>
+            <div class="cert-item">
+              <span class="cert-name">eWPTX - Web App Adv. Tester</span>
+              <span class="cert-tag">Aktif</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MA&#286;AZA -->
+  <section id="magaza">
+    <div class="sec-label">G&#252;venlik Ma&#287;azas&#305;</div>
+    <div class="shop-grid">
+      <div class="shop-card">
+        <span class="shop-badge">Ara&#231;</span>
+        <h4>NetProbe Pro Lisans&#305;</h4>
+        <p>Kurumsal a&#287; ke&#351;if ve zafiyet tarama arac&#305;. Y&#305;ll&#305;k lisans, tam destek dahil.</p>
+        <div class="shop-price">&#8378;4.800 <sup>/ y&#305;l</sup></div>
+        <a href="#iletisim" class="shop-btn">Sat&#305;n Al</a>
+      </div>
+      <div class="shop-card">
+        <span class="shop-badge">&#350;ablon</span>
+        <h4>S&#305;zma Testi Rapor Paketi</h4>
+        <p>ISO 27001 uyumlu, 12 farkl&#305; senaryo i&#231;in profesyonel rapor &#351;ablonlar&#305; (Word + PDF).</p>
+        <div class="shop-price">&#8378;1.200 <sup>tek seferlik</sup></div>
+        <a href="#iletisim" class="shop-btn">Sat&#305;n Al</a>
+      </div>
+      <div class="shop-card featured">
+        <div class="popular-badge">En Pop&#252;ler</div>
+        <span class="shop-badge">E&#287;itim</span>
+        <h4>Red Team Temel E&#287;itimi</h4>
+        <p>40 saatlik video i&#231;erik, 15 lab ortam&#305;. Ba&#351;lang&#305;&#231;-orta seviye ofansif g&#252;venlik yol haritas&#305;.</p>
+        <div class="shop-price">&#8378;3.500 <sup>&#246;m&#252;r boyu eri&#351;im</sup></div>
+        <a href="#iletisim" class="shop-btn featured">Kay&#305;t Ol -&gt;</a>
+      </div>
+      <div class="shop-card">
+        <span class="shop-badge">Dan&#305;&#351;manl&#305;k</span>
+        <h4>Ba&#351;lang&#305;&#231; G&#252;venlik Paketi</h4>
+        <p>KOB&#304;'ler i&#231;in 8 saatlik uzaktan de&#287;erlendirme + &#246;ncelikli bulgu raporu + 30 g&#252;n e-posta deste&#287;i.</p>
+        <div class="shop-price">&#8378;8.900 <sup>tek proje</sup></div>
+        <a href="#iletisim" class="shop-btn">Teklif Al</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- &#304;LET&#304;&#350;&#304;M -->
+  <section id="iletisim">
+    <div class="sec-label">&#304;leti&#351;im</div>
+    <div class="contact-grid">
+      <div class="contact-info">
+        <h2>G&#252;venli&#287;inizi<br>birlikte de&#287;erlendirelim.</h2>
+        <p>Projeniz hakk&#305;nda k&#305;sa bir brifing yap&#305;n. 24 saat i&#231;inde uzman ekibimiz sizinle ileti&#351;ime ge&#231;er.</p>
+        <div class="contact-detail">
+          <div class="contact-row">
+            <i class="ti ti-mail" aria-hidden="true"></i>
+            <span>info@redcell.com.tr</span>
+          </div>
+          <div class="contact-row">
+            <i class="ti ti-phone" aria-hidden="true"></i>
+            <span>+90 212 000 00 00</span>
+          </div>
+          <div class="contact-row">
+            <i class="ti ti-map-pin" aria-hidden="true"></i>
+            <span>&#304;stanbul, T&#252;rkiye</span>
+          </div>
+          <div class="contact-row">
+            <i class="ti ti-shield-lock" aria-hidden="true"></i>
+            <span>T&#252;m ileti&#351;imler NDA kapsam&#305;ndad&#305;r</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="form-group">
+          <label for="ad">Ad Soyad</label>
+          <input type="text" id="ad" placeholder="Ahmet Y&#305;lmaz" />
+        </div>
+        <div class="form-group">
+          <label for="eposta">E-posta</label>
+          <input type="email" id="eposta" placeholder="ahmet@sirket.com" />
+        </div>
+        <div class="form-group">
+          <label for="hizmet">&#304;lgilenilen Hizmet</label>
+          <select id="hizmet">
+            <option value="">Se&#231;iniz...</option>
+            <option>A&#287; S&#305;zma Testi</option>
+            <option>Web Uygulama G&#252;venli&#287;i</option>
+            <option>Mobil Uygulama Analizi</option>
+            <option>Red Team Operasyonu</option>
+            <option>IoT / Donan&#305;m G&#252;venli&#287;i</option>
+            <option>E&#287;itim & Fark&#305;ndal&#305;k</option>
+            <option>Ma&#287;aza &#220;r&#252;n&#252;</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="mesaj">Proje &#214;zeti</label>
+          <textarea id="mesaj" placeholder="Sistemleriniz, kapsam ve beklentileriniz hakk&#305;nda k&#305;saca bilgi verin..."></textarea>
+        </div>
+        <button class="btn-primary" style="width:100%;" onclick="formGonder()">Talebi G&#246;nder -&gt;</button>
+        <p id="form-msg" style="margin-top:14px; font-size:13px; color:var(--green); display:none;">
+          &#10003; Talebiniz al&#305;nd&#305;. En k&#305;sa s&#252;rede d&#246;n&#252;&#351; yapaca&#287;&#305;z.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <a href="#hero" class="footer-logo">RED<span>CELL</span> AR-GE &copy; 2025</a>
+    <div class="footer-links">
+      <a href="#hizmetler">Hizmetler</a>
+      <a href="#magaza">Ma&#287;aza</a>
+      <a href="#iletisim">&#304;leti&#351;im</a>
+    </div>
+    <div class="footer-copy">T&#252;m haklar&#305; sakl&#305;d&#305;r.</div>
+  </footer>
+
+  <script>
+    /* Tab switching */
+    function openTab(panelId) {
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      const panel = document.getElementById(panelId);
+      if (panel) panel.classList.add('active');
+      const tabIndex = ['hizmetler-panel','arge-panel','hakkimizda-panel'].indexOf(panelId);
+      const tabs = document.querySelectorAll('.tab');
+      if (tabs[tabIndex]) tabs[tabIndex].classList.add('active');
+    }
+
+    document.querySelectorAll('.tab').forEach((tab, i) => {
+      tab.addEventListener('click', function() {
+        const panels = ['hizmetler-panel','arge-panel','hakkimizda-panel'];
+        openTab(panels[i]);
+      });
+    });
+
+    /* Animate threat bars on scroll */
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          document.querySelectorAll('.threat-fill').forEach(fill => {
+            const w = fill.getAttribute('data-w');
+            fill.style.width = w + '%';
+          });
+        }
+      });
+    }, { threshold: 0.3 });
+
+    const threatSection = document.querySelector('.threat-bar');
+    if (threatSection) observer.observe(threatSection);
+
+    /* Smooth active nav highlight */
+    const sections = document.querySelectorAll('section[id], div[id="hero"]');
+    const navLinks = document.querySelectorAll('.nav-links a');
+    window.addEventListener('scroll', () => {
+      let current = '';
+      sections.forEach(s => {
+        if (window.scrollY >= s.offsetTop - 80) current = s.id;
+      });
+      navLinks.forEach(a => {
+        a.style.color = a.getAttribute('href') === '#' + current ? 'var(--text)' : '';
+      });
+    });
+
+    /* Form mock submit */
+    function formGonder() {
+      const ad = document.getElementById('ad').value;
+      const eposta = document.getElementById('eposta').value;
+      if (!ad || !eposta) {
+        alert('L\u00FCtfen ad ve e-posta alanlar\u0131n\u0131 doldurun.');
+        return;
+      }
+      document.getElementById('form-msg').style.display = 'block';
+      document.querySelector('#iletisim .btn-primary').disabled = true;
+    }
+  </script>
+
+</body>
+</html>
